@@ -1,6 +1,6 @@
 # Does host threat status predict parasite richness?
 <img src="https://media.giphy.com/media/66wnpo0hMj7HO/giphy.gif">
- **We wanna know**
+We wanna know.
 
 ## IDEAS_JPEK
 This repo is for beginning a collaborative research project for the [IDEAS](http://ideas.ecology.uga.edu) Capstone class (ECOL 8530), Spring 2019.
