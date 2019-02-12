@@ -6,7 +6,7 @@
 This repo is for beginning a collaborative research project for the [IDEAS](http://ideas.ecology.uga.edu) Capstone class (ECOL 8530), Spring 2019.
 
 ## Background
-<img src="https://media.giphy.com/media/3o72FkiKGMGauydfyg/giphy.gif">
+<img src="https://media.giphy.com/media/3o72FkiKGMGauydfyg/giphy.gif" width=50%>
 
 ## Data Sources
 
