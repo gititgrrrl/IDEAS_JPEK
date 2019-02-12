@@ -1,5 +1,5 @@
 # Does host threat status predict parasite richness?
-<img src="https://media.giphy.com/media/66wnpo0hMj7HO/giphy.gif" width=100%>
+<img src="https://media.giphy.com/media/66wnpo0hMj7HO/giphy.gif">
 **We wanna know.**
 
 ## IDEAS_JPEK
