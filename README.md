@@ -7,7 +7,7 @@ Repository for beginning collaborative research project for [IDEAS](http://ideas
 * Paige Miller
 * Joy Vaz
 
-##Question
+## Question
 **Does host threat status predict parasite richness?**
 
 ## Data Sources
