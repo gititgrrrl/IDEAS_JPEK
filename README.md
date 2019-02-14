@@ -23,3 +23,5 @@ This repo is for beginning a collaborative research project for the [IDEAS](http
 * Sonia Altizer
 * Richard Hall
 * Patrick Stephens
+* Max Farrell
+* Andrew Park
