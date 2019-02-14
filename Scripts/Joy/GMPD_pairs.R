@@ -10,10 +10,10 @@ library(magrittr)
 library(dplyr)
 library(stringr)
 
-# load in GMPD
+# load in GMPD_main.csv
 gmpd <- read.csv("./Data/GMPD/GMPD_main.csv") # Rows are unique observations of parasite(ParasiteCorrectedName) occurance in a host(HostCorrectedName) for wild primates, carnivores and ungulates. Data from: Stephens et al. 2017, downloaded from https://esajournals.onlinelibrary.wiley.com/doi/full/10.1002/ecy.1799 on 9.11.2018
 
-# extract species-level traits of 
+# restrict to species-level traits of hosts and parasites
 gmpd_spp <- gmpd %>% filter(HasBinomialName == "yes") %>% 
   select(HostGroup=Group, 
          HostName=HostCorrectedName, 
@@ -27,20 +27,26 @@ gmpd_spp <- gmpd %>% filter(HasBinomialName == "yes") %>%
 gmpd_pairs <- gmpd_spp %>% 
   select(HostName, ParName, HostParPair) %>% 
   distinct()
-#save as csv file
-write.csv(gmpd_pairs, "./Data/JPEK/GMPD_pairs.csv")
+## save as csv
+#write.csv(gmpd_pairs, "./Data/JPEK/GMPD_pairs.csv")
 
-#  calculate host range for each parasite spp
+# calculate host range for each parasite spp
 ParsHostRange <- as.data.frame(table(gmpd_pairs$ParName)) %>% 
   rename(ParName=Var1, NumHostSpp=Freq)
 ParsHostRange_dist <- as.data.frame(table(ParsHostRange$NumHostSpp))
 ## plot
-hist(ParsHostRange$NumHostSpp, breaks = "Scott")
+hist(ParsHostRange$NumHostSpp, 
+     breaks = "Scott", 
+     main = "Histogram: Host Species Range of GMPD Parasites", 
+     xlab = "Number of Host Species")
 
 # calculate parasite richness for each host spp
 HostsParRange <- as.data.frame(table(gmpd_pairs$HostName)) %>% 
   rename(HostName=Var1, NumParSpp=Freq)
 HostsParRange_dist <- as.data.frame(table(HostsParRange$NumParSpp))
 ## plot
-hist(HostsParRange$NumParSpp, breaks = "FD")
+hist(HostsParRange$NumParSpp, 
+     breaks = "FD", 
+     main = "Histogram: Parasite Species Richness of GMPD Mammals",
+     xlab = "Number of Parasite Species")
 #__________________________________________________________________________________
