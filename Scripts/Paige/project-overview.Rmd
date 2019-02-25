@@ -1,0 +1,45 @@
+---
+title: "Project overview for GMPD group"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(magrittr)
+library(ggplot2) 
+
+```
+
+# How do host and parasite traits predict parasite species richness across host threat levels? 
+
+Overall, we predict parasite species richness will decrease when hosts are classified as more threatened. 
+
+However, we predict this general pattern might not be the same across all host and parasite traits. 
+
+*Host* traits we are interested in studying include: 
+
+* host threat status (either binary or grouped IUCN levels)
+* group size
+* population decline
+
+*Parasite* traits we're interested in include: 
+
+* type (bacteria, virus, protozoa, etc.)
+* transmission mode (close, non-close, vector)
+* host breadth (mpd)
+## Project overview
+
+## Variables
+
+```{r}
+library(readr)
+Dat <- read_csv("Data/JPEK/all_vars.csv")
+
+
+
+```
+
+
