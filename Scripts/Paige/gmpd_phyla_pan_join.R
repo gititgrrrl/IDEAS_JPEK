@@ -33,5 +33,5 @@ pan <- pan_raw %>%
 
 dat_combine <- right_join(pan, gmpd_iucn, by = "hostName")
 
-write.csv(dat_combine, file="./Data/JPEK/all_vars.csv")
+write_csv(dat_combine, "./Data/JPEK/all_vars.csv")
 

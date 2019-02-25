@@ -1,5 +1,5 @@
 ---
-title: "Project overview for GMPD group"
+title: "Project overview and data analysis for GMPD group"
 output: pdf_document
 editor_options: 
   chunk_output_type: console
@@ -10,6 +10,9 @@ editor_options:
 library(tidyverse)
 library(magrittr)
 library(ggplot2) 
+library(knitr)
+
+knitr::opts_chunk$set(cache=TRUE, message = FALSE, echo = FALSE)
 
 ```
 
@@ -18,6 +21,8 @@ library(ggplot2)
 Overall, we predict parasite species richness will decrease when hosts are classified as more threatened. 
 
 However, we predict this general pattern might not be the same across all host and parasite traits. 
+
+
 
 *Host* traits we are interested in studying include: 
 
@@ -30,16 +35,117 @@ However, we predict this general pattern might not be the same across all host a
 * type (bacteria, virus, protozoa, etc.)
 * transmission mode (close, non-close, vector)
 * host breadth (mpd)
-## Project overview
 
-## Variables
+## Data
+
+*Host-parasite pairs*: 
+
+* Records of parasitic organisms reported from free-living mammals were obtained from GMPD. 
 
 ```{r}
-library(readr)
-Dat <- read_csv("Data/JPEK/all_vars.csv")
 
+rawDat <- read_csv("~/Desktop/IDEAS_JPEK/Data/JPEK/all_vars.csv")
+summary(rawDat)
+
+dat <- rawDat # copy of rawDat
+```
+
+```{r}
+
+# num hosts per mammal group
+dat %>%
+  group_by(Group) %>% distinct(hostName) %>% tally() -> foo
+foo <- rbind(foo, c("Total", sum(foo$n)))
+knitr::kable(foo, table.caption="Number of hosts in each mammal group from GMPD. ")
+
+# it seems like maybe one host is listed as multiple types of "Group"? TBD
+
+```
+
+This left us with `r nrow(dat)` rows of data and `r length(unique(dat$hostName))`. 
+
+*Parasite traits*: Host specificity (whether present in one or more hosts), transmission mode (close, non-close, VBD), and type (virus, protozoan, fungus, arthropod, helminth, or bacterium) were taken from GMPD. Host breadth (mpd across host spp) was taken from Park et al. (2018?) but TBD. 
+
+```{r}
+# tables of different parasite traits
+dat %>% distinct(parasiteName, .keep_all = TRUE) -> foo
+
+kable(table(foo$ParType), 
+      caption= "Distribution of parasite type in dataset. ", 
+      col.names = c("Type", "n"))
+
+kable(data.frame(close=sum(foo$close, na.rm=TRUE),
+           nonClose=sum(foo$nonclose, na.rm=TRUE),
+           vector=sum(foo$vector, na.rm=TRUE),
+           intermediate=sum(foo$intermediate, na.rm=TRUE)),
+      caption="Distribution of transmission modes of parasites in dataset. Some parasites may have multiple modes of transmission. ")
+
+```
+
+We have `r length(unique(dat$parasiteName))` unique parasites. 
+
+*Host traits*: Host traits were obtained from Pantheria and Phylacine. 
+
+Data were joined by host species names and filtered by hosts with records in GMPD. 
+
+```{r}
+
+# number of parasites per host uncorrected for sampling
+dat %>% group_by(Group) %>%
+  
 
 
 ```
+
+* Parasite richness: calculated by summing number of unique parasites per host 
+
+```{r}
+# histograms of uncorrected  parasite species richness per host
+dat %>%
+  ggplot(aes(parRich, fill=Group)) + geom_histogram() + 
+  facet_grid(Group~.) + theme(legend.position = "none") + 
+  labs(title="Uncorrected parasite richness per host") + 
+  ylab("") + xlab("Parasites per host")
+
+```
+
+```{r}
+
+# want the top 3 hosts with the largest values of parasite spp richness
+dat %>% distinct(hostName, .keep_all = TRUE) -> foo
+foo %>% select(hostName, Group, parRich) -> foo
+
+foo %>% group_by(Group) %>% top_n(3) %>% arrange(Group, parRich) -> foo
+
+kable(foo, caption = "Top 3 host species per mammal group by uncorrected parasite richness. ")
+
+```
+
+
+## Statistical Analyses 
+
+*Type of model/overall modeling scheme*: TBD 
+
+* Because carnivores, primates, and ungulates have different life histories, ecologies, and predictors of exitinction risk, we will conduct models separately for each group, though the number of hosts per parasite (specialist/generalist variable) will be taken from merged host-parasite lists across all three groups. 
+
+*Controling for uneven sampling*: To control for uneven sampling of parasites among hosts, we will include as a covariate the number of unique citations per host (Altizer, Nunn & Lindenfors 2007). Note: could also try # of individuals sampled per host. 
+
+*Details of model*: 
+* Variables will be checked for colinearity
+* Which packages used for which analyses: TBD
+* Whether to account for phylogenetic signal in residuals: TBD
+
+*Sensitivity analyses*
+
+* Reducing models by taking out predicts with p>0.1 and refitting with sampling/phylogenetic bias: TBD
+* But threat status & citations will be forced into all models
+* Could do bivariate model with threat status and citation count to explore effect of threat status in absence of ecological covratiates
+* Others? 
+
+## Results: 
+
+* Pattern of parasite spp richness across threat level (violin plot)
+* 
+
 
 

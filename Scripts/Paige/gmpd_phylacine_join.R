@@ -1,9 +1,12 @@
 # script to join GMPD with phylacine by host name to get host threat status of hosts in GMPD
+# run this script before join with pantheria
+
 library(tidyverse)
 library(magrittr)
 library(ggplot2) 
 
-GMPD_raw <- read_csv("Data/GMPD/GMPD_main.csv")
+GMPD_raw <- read_csv("Data/GMPD/GMPD_main.csv") # main file
+GMPD_par_traits_raw <- read_csv("Data/GMPD/GMPD_parasite_traits.csv")
 phyla_raw <- read_csv("Data/phylacine/Trait_data.csv")
 
 # The host matching variable in GMPD is HostCorrected (format = Genus species)
@@ -20,6 +23,10 @@ GMPD %<>% select(Group, hostName, parasiteName,
                  ParType, ParPhylum, Prevalence, 
                  HostsSampled, SamplingType, 
                  HostEnvironment, Citation)
+
+parTraits <- GMPD_par_traits_raw %>% rename(parasiteName=ParasiteCorrectedName)
+
+GMPD <- left_join(GMPD,parTraits, by="parasiteName")
 
 # select curretnly required columns phylacine data
 phyla <- select(phyla_raw, "Binomial.1.2", "Order.1.2", "Family.1.2", "Genus.1.2", "IUCN.Status.1.2", "Mass.g") %>%
