@@ -12,7 +12,7 @@ library(magrittr)
 library(ggplot2) 
 library(knitr)
 
-knitr::opts_chunk$set(cache=TRUE, message = FALSE, echo = FALSE)
+knitr::opts_chunk$set(cache=TRUE, message = FALSE, echo = FALSE, fig.path = "univariatePlots/")
 
 ```
 
@@ -21,8 +21,6 @@ knitr::opts_chunk$set(cache=TRUE, message = FALSE, echo = FALSE)
 Overall, we predict parasite species richness will decrease when hosts are classified as more threatened. 
 
 However, we predict this general pattern might not be the same across all host and parasite traits. 
-
-
 
 *Host* traits we are interested in studying include: 
 
@@ -44,10 +42,26 @@ However, we predict this general pattern might not be the same across all host a
 
 ```{r}
 
+# data manipulation prior to plotting/analysis
 rawDat <- read_csv("~/Desktop/IDEAS_JPEK/Data/JPEK/all_vars.csv")
 summary(rawDat)
 
 dat <- rawDat # copy of rawDat
+
+# adding variables for citation/sampling bias
+dat %>%
+  group_by(hostName) %>%
+  distinct(Citation) %>% group_by(hostName) %>%
+  tally() %>% rename(numHostCitations=n) -> hCitDf
+  
+dat %>%
+  group_by(parasiteName) %>%
+  distinct(Citation) %>% group_by(parasiteName) %>%
+  tally() %>% rename(numParCitations=n) -> pCitDf  
+
+dat <- left_join(dat, hCitDf, by="hostName")
+dat <- left_join(dat, pCitDf, by="parasiteName")
+
 ```
 
 ```{r}
@@ -86,20 +100,56 @@ We have `r length(unique(dat$parasiteName))` unique parasites.
 
 *Host traits*: Host traits were obtained from Pantheria and Phylacine. 
 
-Data were joined by host species names and filtered by hosts with records in GMPD. 
+* Data were joined by host species names and filtered by hosts with records in GMPD. 
+* Threat levels: 
 
-```{r}
+Extinct (EX) – beyond reasonable doubt that the species is no longer extant.
+Extinct in the wild (EW) – survives only in captivity, cultivation and/or outside native range, as presumed after exhaustive surveys.
+Critically endangered (CR) – in a particularly and extremely critical state.
+Endangered (EN) – very high risk of extinction in the wild, meets any of criteria A to E for Endangered.
+Vulnerable (VU) – meets one of the 5 red list criteria and thus considered to be at high risk of unnatural (human-caused) extinction without further human intervention.
+Near threatened (NT) – close to being at high risk of extinction in the near future.
+Least concern (LC) – unlikely to become extinct in the near future.
+Data deficient (DD)
+Not evaluated (NE)
+
+```{r threatLev}
+
+dat %>% group_by(Group, IUCN.Status.1.2) %>% tally() %>% 
+  spread(IUCN.Status.1.2, n) %>% select(`<NA>`, DD, LC, NT, VU, EN, CR) ->foo
+  
+kable(foo, caption = "Distribution of threat levels from phylacine database shows there are many hosts without IUCN levels characterized. ")
+
+plot(1:7, foo[1,2:8], type="b", ylim=c(0, max(foo[,2:8], na.rm = T)), 
+     ylab="Num hosts", xlab="Threat level", xaxt="n")
+points(1:7, foo[2, 2:8], col=4, type="b")
+points(1:7, foo[3, 2:8], col=2, type="b")
+legend("topright", legend=c("Carnivores", "Primates", "Ungulates"), 
+       col=c(1, 4, 2), lty=1, bty="n")
+axis(side=1, labels=c("NA", "DD", "LC", "NT", "VU", "EN", "CR"), at=1:7)
+```
+
+```{r hostTraits}
 
 # number of parasites per host uncorrected for sampling
-dat %>% group_by(Group) %>%
+dat %>% gather("stat","val", c(dietBreadth, maxLongevity, popGrpSize, Mass.g, 
+                               socGrpSize,popDenChange)) %>% 
+  select(hostName, Group, HostEnvironment,stat, val)-> foo
   
-
+foo %>%
+  ggplot(aes(val, fill=Group)) + 
+  geom_histogram() + 
+  facet_grid(Group ~ stat, scales="free") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  theme(legend.position = "none") + 
+  labs(title="Host traits") + 
+  ylab("") + xlab("Trait")
 
 ```
 
 * Parasite richness: calculated by summing number of unique parasites per host 
 
-```{r}
+```{r parRich}
 # histograms of uncorrected  parasite species richness per host
 dat %>%
   ggplot(aes(parRich, fill=Group)) + geom_histogram() + 
@@ -121,7 +171,6 @@ kable(foo, caption = "Top 3 host species per mammal group by uncorrected parasit
 
 ```
 
-
 ## Statistical Analyses 
 
 *Type of model/overall modeling scheme*: TBD 
@@ -129,6 +178,45 @@ kable(foo, caption = "Top 3 host species per mammal group by uncorrected parasit
 * Because carnivores, primates, and ungulates have different life histories, ecologies, and predictors of exitinction risk, we will conduct models separately for each group, though the number of hosts per parasite (specialist/generalist variable) will be taken from merged host-parasite lists across all three groups. 
 
 *Controling for uneven sampling*: To control for uneven sampling of parasites among hosts, we will include as a covariate the number of unique citations per host (Altizer, Nunn & Lindenfors 2007). Note: could also try # of individuals sampled per host. 
+
+```{r samplingBias1}
+
+# scatter plot richness ~ host citations
+dat %>%
+  select(hostName, Group, numHostCitations, parRich) %>%
+  distinct(hostName, .keep_all = TRUE) -> hostBias
+
+hostBias %>% 
+  ggplot(aes(numHostCitations, parRich, color=Group)) + 
+  geom_point(size=.75) + facet_grid(Group ~.) +
+  scale_x_log10() + scale_y_log10() +
+  theme(legend.position = "none") + 
+  labs(title="Sampling bias (# citations per host)") + 
+  ylab("Richness (log10)") + xlab("Citations (log10)")
+
+```
+
+```{r samplingBias2}
+
+# scatter plot richness ~ host samples
+dat %>%
+  group_by(hostName) %>%
+  summarise(totHostsSampled=sum(HostsSampled, na.rm=TRUE)) -> hostBias2 
+
+foo <- right_join(dat, hostBias2, by="hostName") %>% 
+  distinct(hostName, .keep_all = TRUE)
+  
+foo %>% 
+  ggplot(aes(totHostsSampled, parRich, color=Group)) + 
+  scale_x_log10() + scale_y_log10() + 
+  geom_point(size=.75) + facet_grid(Group ~., scales = "free") +
+  theme(legend.position = "none") + 
+  labs(title="Sampling bias (# individual hosts sampled)") + 
+  ylab("Richness (log10)") + xlab("Individuals sampled (log10)")
+
+
+```
+
 
 *Details of model*: 
 * Variables will be checked for colinearity
@@ -145,6 +233,32 @@ kable(foo, caption = "Top 3 host species per mammal group by uncorrected parasit
 ## Results: 
 
 * Pattern of parasite spp richness across threat level (violin plot)
+
+```{r iucnRich-uncorrected}
+
+IUCN.levels <- c("NE", "DD", "LC", "NT", "VU", "EN", "CR", "EW")
+dat$IUCN.Status.1.2 <- factor(dat$IUCN.Status.1.2, levels = IUCN.levels)
+
+dat %>%
+  filter(IUCN.Status.1.2 != "DD", !is.na(IUCN.Status.1.2)) %>%
+  ggplot(aes(IUCN.Status.1.2, parRich, color = IUCN.Status.1.2)) +
+  geom_violin() + 
+  scale_y_log10() + 
+  facet_grid(Group ~ .) + 
+  ggtitle("Uncorrected parasite richness by IUCN level") +
+  labs (y = "Richness (log10)", x = "IUCN Classifications") +
+  theme(legend.position="none")
+
+```
+
+
+
+```{r}
+
+```
+
+
+
 * 
 
 
