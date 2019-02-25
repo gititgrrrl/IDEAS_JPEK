@@ -31,4 +31,7 @@ pan <- pan_raw %>%
          maxLongevity, popGrpSize,
          socGrpSize, popDenChange)
 
-dat_combine <- full_join(gmpd_iucn, pan, by = "hostName")
+dat_combine <- right_join(pan, gmpd_iucn, by = "hostName")
+
+write.csv(dat_combine, file="./Data/JPEK/all_vars.csv")
+

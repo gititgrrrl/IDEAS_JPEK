@@ -16,7 +16,10 @@ GMPD <- GMPD_raw %>%
   rename(hostName=HostCorrectedName, parasiteName=ParasiteCorrectedName) 
 
 # select currently required columns gmpd data
-GMPD %<>% select(Group, hostName, parasiteName, ParType, ParPhylum, Prevalence, HostsSampled, SamplingType, HostEnvironment)
+GMPD %<>% select(Group, hostName, parasiteName, 
+                 ParType, ParPhylum, Prevalence, 
+                 HostsSampled, SamplingType, 
+                 HostEnvironment, Citation)
 
 # select curretnly required columns phylacine data
 phyla <- select(phyla_raw, "Binomial.1.2", "Order.1.2", "Family.1.2", "Genus.1.2", "IUCN.Status.1.2", "Mass.g") %>%
