@@ -1,5 +1,5 @@
 ---
-title: "Project overview and data analysis for GMPD group"
+title: "GMPD IDEAS Capstone"
 output: pdf_document
 editor_options: 
   chunk_output_type: console
@@ -25,8 +25,8 @@ However, we predict this general pattern might not be the same across all host a
 *Host* traits we are interested in studying include: 
 
 * host threat status (either binary or grouped IUCN levels)
+* population density change
 * group size
-* population decline
 
 *Parasite* traits we're interested in include: 
 
@@ -242,7 +242,7 @@ dat$IUCN.Status.1.2 <- factor(dat$IUCN.Status.1.2, levels = IUCN.levels)
 dat %>%
   filter(IUCN.Status.1.2 != "DD", !is.na(IUCN.Status.1.2)) %>%
   ggplot(aes(IUCN.Status.1.2, parRich, color = IUCN.Status.1.2)) +
-  geom_violin() + 
+  geom_violin(scale="count") + 
   scale_y_log10() + 
   facet_grid(Group ~ .) + 
   ggtitle("Uncorrected parasite richness by IUCN level") +
@@ -251,15 +251,78 @@ dat %>%
 
 ```
 
+```{r iucnRich-corrected}
 
+# linear regression of richness by citations
+mod_carn <- lm(log10(parRich)~log10(numHostCitations), 
+           data=filter(dat, Group=="carnivores"))
+mod_ung <- lm(log10(parRich)~log10(numHostCitations), 
+           data=filter(dat, Group=="ungulates"))
+mod_prim <- lm(log10(parRich)~log10(numHostCitations), 
+           data=filter(dat, Group=="primates"))
 
-```{r}
+# corrected by citation counts
+corCarn <- filter(dat, Group=="carnivores") %>%
+  mutate(resid=residuals(mod_carn))
+corUng <- filter(dat, Group=="ungulates") %>%
+  mutate(resid=residuals(mod_ung))
+corPrim <- filter(dat, Group=="primates") %>%
+  mutate(resid=residuals(mod_prim))
+datCorrected <- bind_rows(corCarn, corUng, corPrim)
+
+datCorrected %>%
+  distinct(hostName, .keep_all = TRUE) %>%
+  filter(IUCN.Status.1.2 != "DD", !is.na(IUCN.Status.1.2)) %>%
+  ggplot(aes(IUCN.Status.1.2, resid, color = IUCN.Status.1.2)) +
+  geom_violin(scale="count") + 
+  #scale_y_log10() + 
+  facet_grid(Group ~ .) + 
+  ggtitle("Corrected parasite richness by IUCN level") +
+  labs (y = "Residuals", x = "IUCN Classifications") +
+  theme(legend.position="none")
 
 ```
 
+* pattern of parasite species richness by amount of population change
+
+```{r popDenChange}
+datCorrected %>%
+  filter(popDenChange>-100) %>%
+  ggplot(aes(popDenChange, resid, color=Group)) +
+  geom_point(size=.75) + facet_grid(Group ~.) +
+  labs(title="Richness ~ population density change") + 
+  theme(legend.position = "none") + 
+  ylab("Residuals") + xlab("Population density change") + 
+  geom_smooth(method="lm", size=.75)
+
+```
+
+* pattern of parasite species richness by amount of population change & parasite type
+
+```{r, eval=FALSE}
+foo <- datCorrected # copy of datCorrected so I don't mess it up
+
+foo$close2 <- ifelse(foo$close==1, "close", " ")
+foo$nonclose2 <- ifelse(foo$nonclose==1, "nonclose", " ")
+foo$vector2 <- ifelse(foo$vector==1, "vector", " ")
+foo$intermediate2 <- ifelse(foo$intermediate==1, "intermediate", " ")
+
+foo %<>% unite(col=transmissionModes, 
+               sep=" ", close2, nonclose2, vector2, intermediate2) 
+
+datCorrected %<>% mutate(transmissionModes=foo$transmissionModes)
+
+datCorrected %>%
+  filter(popDenChange>-100) %>%
+  filter(transmissionModes) %>%
+  ggplot(aes(popDenChange, resid, color=Group)) +
+  geom_point(size=.75) + facet_grid(transmissionModes ~ Group) +
+  labs(title="Richness ~ population density change") + 
+  theme(legend.position = "none") + 
+  ylab("Residuals") + xlab("Population density change") + 
+  geom_smooth(method="lm", size=.75)
 
 
-* 
-
+```
 
 
