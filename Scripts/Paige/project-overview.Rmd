@@ -325,4 +325,7 @@ datCorrected %>%
 
 ```
 
+```{r}
+write.csv(datCorrected, "/Data/dat-residual-corrected.csv")
+```
 
