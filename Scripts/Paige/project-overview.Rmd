@@ -12,7 +12,8 @@ library(magrittr)
 library(ggplot2) 
 library(knitr)
 
-knitr::opts_chunk$set(cache=TRUE, message = FALSE, echo = FALSE, fig.path = "univariatePlots/")
+knitr::opts_chunk$set(cache=FALSE, message = FALSE, 
+                      echo = FALSE, fig.path = "exploratory-plots/")
 
 ```
 
@@ -132,14 +133,16 @@ axis(side=1, labels=c("NA", "DD", "LC", "NT", "VU", "EN", "CR"), at=1:7)
 ```{r hostTraits}
 
 # number of parasites per host uncorrected for sampling
-dat %>% gather("stat","val", c(dietBreadth, maxLongevity, popGrpSize, Mass.g, 
-                               socGrpSize,popDenChange)) %>% 
+dat %>% gather("stat","val", 
+               c(dietBreadth, maxLongevity, comGrpSize, 
+                 Mass.g, popDenChange)) %>% 
   select(hostName, Group, HostEnvironment,stat, val)-> foo
   
 foo %>%
   ggplot(aes(val, fill=Group)) + 
   geom_histogram() + 
   facet_grid(Group ~ stat, scales="free") + 
+  scale_x_log10() + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
   theme(legend.position = "none") + 
   labs(title="Host traits") + 
@@ -326,6 +329,10 @@ datCorrected %>%
 ```
 
 ```{r}
-write.csv(datCorrected, "/Data/dat-residual-corrected.csv")
+
+# write_csv(datCorrected, "./Data/JPEK/dat-residual-corrected.csv")
+
 ```
+
+
 
