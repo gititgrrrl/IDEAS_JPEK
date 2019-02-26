@@ -1,0 +1,331 @@
+---
+title: "GMPD IDEAS Capstone"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(magrittr)
+library(ggplot2) 
+library(knitr)
+
+knitr::opts_chunk$set(cache=TRUE, message = FALSE, echo = FALSE, fig.path = "univariatePlots/")
+
+```
+
+# How do host and parasite traits predict parasite species richness across host threat levels? 
+
+Overall, we predict parasite species richness will decrease when hosts are classified as more threatened. 
+
+However, we predict this general pattern might not be the same across all host and parasite traits. 
+
+*Host* traits we are interested in studying include: 
+
+* host threat status (either binary or grouped IUCN levels)
+* population density change
+* group size
+
+*Parasite* traits we're interested in include: 
+
+* type (bacteria, virus, protozoa, etc.)
+* transmission mode (close, non-close, vector)
+* host breadth (mpd)
+
+## Data
+
+*Host-parasite pairs*: 
+
+* Records of parasitic organisms reported from free-living mammals were obtained from GMPD. 
+
+```{r}
+
+# data manipulation prior to plotting/analysis
+rawDat <- read_csv("~/Desktop/IDEAS_JPEK/Data/JPEK/all_vars.csv")
+summary(rawDat)
+
+dat <- rawDat # copy of rawDat
+
+# adding variables for citation/sampling bias
+dat %>%
+  group_by(hostName) %>%
+  distinct(Citation) %>% group_by(hostName) %>%
+  tally() %>% rename(numHostCitations=n) -> hCitDf
+  
+dat %>%
+  group_by(parasiteName) %>%
+  distinct(Citation) %>% group_by(parasiteName) %>%
+  tally() %>% rename(numParCitations=n) -> pCitDf  
+
+dat <- left_join(dat, hCitDf, by="hostName")
+dat <- left_join(dat, pCitDf, by="parasiteName")
+
+```
+
+```{r}
+
+# num hosts per mammal group
+dat %>%
+  group_by(Group) %>% distinct(hostName) %>% tally() -> foo
+foo <- rbind(foo, c("Total", sum(foo$n)))
+knitr::kable(foo, table.caption="Number of hosts in each mammal group from GMPD. ")
+
+# it seems like maybe one host is listed as multiple types of "Group"? TBD
+
+```
+
+This left us with `r nrow(dat)` rows of data and `r length(unique(dat$hostName))`. 
+
+*Parasite traits*: Host specificity (whether present in one or more hosts), transmission mode (close, non-close, VBD), and type (virus, protozoan, fungus, arthropod, helminth, or bacterium) were taken from GMPD. Host breadth (mpd across host spp) was taken from Park et al. (2018?) but TBD. 
+
+```{r}
+# tables of different parasite traits
+dat %>% distinct(parasiteName, .keep_all = TRUE) -> foo
+
+kable(table(foo$ParType), 
+      caption= "Distribution of parasite type in dataset. ", 
+      col.names = c("Type", "n"))
+
+kable(data.frame(close=sum(foo$close, na.rm=TRUE),
+           nonClose=sum(foo$nonclose, na.rm=TRUE),
+           vector=sum(foo$vector, na.rm=TRUE),
+           intermediate=sum(foo$intermediate, na.rm=TRUE)),
+      caption="Distribution of transmission modes of parasites in dataset. Some parasites may have multiple modes of transmission. ")
+
+```
+
+We have `r length(unique(dat$parasiteName))` unique parasites. 
+
+*Host traits*: Host traits were obtained from Pantheria and Phylacine. 
+
+* Data were joined by host species names and filtered by hosts with records in GMPD. 
+* Threat levels: 
+
+Extinct (EX) – beyond reasonable doubt that the species is no longer extant.
+Extinct in the wild (EW) – survives only in captivity, cultivation and/or outside native range, as presumed after exhaustive surveys.
+Critically endangered (CR) – in a particularly and extremely critical state.
+Endangered (EN) – very high risk of extinction in the wild, meets any of criteria A to E for Endangered.
+Vulnerable (VU) – meets one of the 5 red list criteria and thus considered to be at high risk of unnatural (human-caused) extinction without further human intervention.
+Near threatened (NT) – close to being at high risk of extinction in the near future.
+Least concern (LC) – unlikely to become extinct in the near future.
+Data deficient (DD)
+Not evaluated (NE)
+
+```{r threatLev}
+
+dat %>% group_by(Group, IUCN.Status.1.2) %>% tally() %>% 
+  spread(IUCN.Status.1.2, n) %>% select(`<NA>`, DD, LC, NT, VU, EN, CR) ->foo
+  
+kable(foo, caption = "Distribution of threat levels from phylacine database shows there are many hosts without IUCN levels characterized. ")
+
+plot(1:7, foo[1,2:8], type="b", ylim=c(0, max(foo[,2:8], na.rm = T)), 
+     ylab="Num hosts", xlab="Threat level", xaxt="n")
+points(1:7, foo[2, 2:8], col=4, type="b")
+points(1:7, foo[3, 2:8], col=2, type="b")
+legend("topright", legend=c("Carnivores", "Primates", "Ungulates"), 
+       col=c(1, 4, 2), lty=1, bty="n")
+axis(side=1, labels=c("NA", "DD", "LC", "NT", "VU", "EN", "CR"), at=1:7)
+```
+
+```{r hostTraits}
+
+# number of parasites per host uncorrected for sampling
+dat %>% gather("stat","val", c(dietBreadth, maxLongevity, popGrpSize, Mass.g, 
+                               socGrpSize,popDenChange)) %>% 
+  select(hostName, Group, HostEnvironment,stat, val)-> foo
+  
+foo %>%
+  ggplot(aes(val, fill=Group)) + 
+  geom_histogram() + 
+  facet_grid(Group ~ stat, scales="free") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  theme(legend.position = "none") + 
+  labs(title="Host traits") + 
+  ylab("") + xlab("Trait")
+
+```
+
+* Parasite richness: calculated by summing number of unique parasites per host 
+
+```{r parRich}
+# histograms of uncorrected  parasite species richness per host
+dat %>%
+  ggplot(aes(parRich, fill=Group)) + geom_histogram() + 
+  facet_grid(Group~.) + theme(legend.position = "none") + 
+  labs(title="Uncorrected parasite richness per host") + 
+  ylab("") + xlab("Parasites per host")
+
+```
+
+```{r}
+
+# want the top 3 hosts with the largest values of parasite spp richness
+dat %>% distinct(hostName, .keep_all = TRUE) -> foo
+foo %>% select(hostName, Group, parRich) -> foo
+
+foo %>% group_by(Group) %>% top_n(3) %>% arrange(Group, parRich) -> foo
+
+kable(foo, caption = "Top 3 host species per mammal group by uncorrected parasite richness. ")
+
+```
+
+## Statistical Analyses 
+
+*Type of model/overall modeling scheme*: TBD 
+
+* Because carnivores, primates, and ungulates have different life histories, ecologies, and predictors of exitinction risk, we will conduct models separately for each group, though the number of hosts per parasite (specialist/generalist variable) will be taken from merged host-parasite lists across all three groups. 
+
+*Controling for uneven sampling*: To control for uneven sampling of parasites among hosts, we will include as a covariate the number of unique citations per host (Altizer, Nunn & Lindenfors 2007). Note: could also try # of individuals sampled per host. 
+
+```{r samplingBias1}
+
+# scatter plot richness ~ host citations
+dat %>%
+  select(hostName, Group, numHostCitations, parRich) %>%
+  distinct(hostName, .keep_all = TRUE) -> hostBias
+
+hostBias %>% 
+  ggplot(aes(numHostCitations, parRich, color=Group)) + 
+  geom_point(size=.75) + facet_grid(Group ~.) +
+  scale_x_log10() + scale_y_log10() +
+  theme(legend.position = "none") + 
+  labs(title="Sampling bias (# citations per host)") + 
+  ylab("Richness (log10)") + xlab("Citations (log10)")
+
+```
+
+```{r samplingBias2}
+
+# scatter plot richness ~ host samples
+dat %>%
+  group_by(hostName) %>%
+  summarise(totHostsSampled=sum(HostsSampled, na.rm=TRUE)) -> hostBias2 
+
+foo <- right_join(dat, hostBias2, by="hostName") %>% 
+  distinct(hostName, .keep_all = TRUE)
+  
+foo %>% 
+  ggplot(aes(totHostsSampled, parRich, color=Group)) + 
+  scale_x_log10() + scale_y_log10() + 
+  geom_point(size=.75) + facet_grid(Group ~., scales = "free") +
+  theme(legend.position = "none") + 
+  labs(title="Sampling bias (# individual hosts sampled)") + 
+  ylab("Richness (log10)") + xlab("Individuals sampled (log10)")
+
+
+```
+
+
+*Details of model*: 
+* Variables will be checked for colinearity
+* Which packages used for which analyses: TBD
+* Whether to account for phylogenetic signal in residuals: TBD
+
+*Sensitivity analyses*
+
+* Reducing models by taking out predicts with p>0.1 and refitting with sampling/phylogenetic bias: TBD
+* But threat status & citations will be forced into all models
+* Could do bivariate model with threat status and citation count to explore effect of threat status in absence of ecological covratiates
+* Others? 
+
+## Results: 
+
+* Pattern of parasite spp richness across threat level (violin plot)
+
+```{r iucnRich-uncorrected}
+
+IUCN.levels <- c("NE", "DD", "LC", "NT", "VU", "EN", "CR", "EW")
+dat$IUCN.Status.1.2 <- factor(dat$IUCN.Status.1.2, levels = IUCN.levels)
+
+dat %>%
+  filter(IUCN.Status.1.2 != "DD", !is.na(IUCN.Status.1.2)) %>%
+  ggplot(aes(IUCN.Status.1.2, parRich, color = IUCN.Status.1.2)) +
+  geom_violin(scale="count") + 
+  scale_y_log10() + 
+  facet_grid(Group ~ .) + 
+  ggtitle("Uncorrected parasite richness by IUCN level") +
+  labs (y = "Richness (log10)", x = "IUCN Classifications") +
+  theme(legend.position="none")
+
+```
+
+```{r iucnRich-corrected}
+
+# linear regression of richness by citations
+mod_carn <- lm(log10(parRich)~log10(numHostCitations), 
+           data=filter(dat, Group=="carnivores"))
+mod_ung <- lm(log10(parRich)~log10(numHostCitations), 
+           data=filter(dat, Group=="ungulates"))
+mod_prim <- lm(log10(parRich)~log10(numHostCitations), 
+           data=filter(dat, Group=="primates"))
+
+# corrected by citation counts
+corCarn <- filter(dat, Group=="carnivores") %>%
+  mutate(resid=residuals(mod_carn))
+corUng <- filter(dat, Group=="ungulates") %>%
+  mutate(resid=residuals(mod_ung))
+corPrim <- filter(dat, Group=="primates") %>%
+  mutate(resid=residuals(mod_prim))
+datCorrected <- bind_rows(corCarn, corUng, corPrim)
+
+datCorrected %>%
+  distinct(hostName, .keep_all = TRUE) %>%
+  filter(IUCN.Status.1.2 != "DD", !is.na(IUCN.Status.1.2)) %>%
+  ggplot(aes(IUCN.Status.1.2, resid, color = IUCN.Status.1.2)) +
+  geom_violin(scale="count") + 
+  #scale_y_log10() + 
+  facet_grid(Group ~ .) + 
+  ggtitle("Corrected parasite richness by IUCN level") +
+  labs (y = "Residuals", x = "IUCN Classifications") +
+  theme(legend.position="none")
+
+```
+
+* pattern of parasite species richness by amount of population change
+
+```{r popDenChange}
+datCorrected %>%
+  filter(popDenChange>-100) %>%
+  ggplot(aes(popDenChange, resid, color=Group)) +
+  geom_point(size=.75) + facet_grid(Group ~.) +
+  labs(title="Richness ~ population density change") + 
+  theme(legend.position = "none") + 
+  ylab("Residuals") + xlab("Population density change") + 
+  geom_smooth(method="lm", size=.75)
+
+```
+
+* pattern of parasite species richness by amount of population change & parasite type
+
+```{r, eval=FALSE}
+foo <- datCorrected # copy of datCorrected so I don't mess it up
+
+foo$close2 <- ifelse(foo$close==1, "close", " ")
+foo$nonclose2 <- ifelse(foo$nonclose==1, "nonclose", " ")
+foo$vector2 <- ifelse(foo$vector==1, "vector", " ")
+foo$intermediate2 <- ifelse(foo$intermediate==1, "intermediate", " ")
+
+foo %<>% unite(col=transmissionModes, 
+               sep=" ", close2, nonclose2, vector2, intermediate2) 
+
+datCorrected %<>% mutate(transmissionModes=foo$transmissionModes)
+
+datCorrected %>%
+  filter(popDenChange>-100) %>%
+  filter(transmissionModes) %>%
+  ggplot(aes(popDenChange, resid, color=Group)) +
+  geom_point(size=.75) + facet_grid(transmissionModes ~ Group) +
+  labs(title="Richness ~ population density change") + 
+  theme(legend.position = "none") + 
+  ylab("Residuals") + xlab("Population density change") + 
+  geom_smooth(method="lm", size=.75)
+
+
+```
+
+```{r}
+write.csv(datCorrected, "/Data/dat-residual-corrected.csv")
+```
+
