@@ -11,7 +11,7 @@ library(ggplot2)
 pan_raw <- read_delim("Data/pantheria/pan.txt", 
                   "\t", escape_double = FALSE, na = "-999", 
                   trim_ws = TRUE)
-gmpd_iucn <- read_csv("Data/JPEK/GMPD_threat.csv")
+gmpd_iucn <- read_csv("Data/JPEK/script1.csv")
 
 par_rich <- gmpd_iucn %>%
   group_by(hostName, parasiteName) %>%
@@ -42,5 +42,7 @@ pan <- right_join(pan, foo, by="hostName")
 
 dat_combine <- right_join(pan, gmpd_iucn, by = "hostName")
 
-write_csv(dat_combine, "./Data/JPEK/all_vars.csv")
+dat_combine %<>% select(-popGrpSize.x, -popGrpSize.y, -socGrpSize.x, -socGrpSize.y)
+
+write_csv(dat_combine, "./Data/JPEK/script2.csv")
 

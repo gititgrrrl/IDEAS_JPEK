@@ -36,4 +36,4 @@ phyla <- select(phyla_raw, "Binomial.1.2", "Order.1.2", "Family.1.2", "Genus.1.2
 # Then we *should* be able to right join matching rows from phyla to GMPD
 GMPD_threat <- right_join(phyla, GMPD, by="hostName")
 
-write_csv(GMPD_threat, "./Data/JPEK/GMPD_threat.csv")
+write_csv(GMPD_threat, "./Data/JPEK/script1.csv")

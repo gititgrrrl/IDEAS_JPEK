@@ -44,7 +44,7 @@ However, we predict this general pattern might not be the same across all host a
 ```{r}
 
 # data manipulation prior to plotting/analysis
-rawDat <- read_csv("~/Desktop/IDEAS_JPEK/Data/JPEK/all_vars.csv")
+rawDat <- read_csv("~/Desktop/IDEAS_JPEK/Data/JPEK/script3.csv")
 summary(rawDat)
 
 dat <- rawDat # copy of rawDat
@@ -330,7 +330,7 @@ datCorrected %>%
 
 ```{r}
 
-# write_csv(datCorrected, "./Data/JPEK/dat-residual-corrected.csv")
+write_csv(datCorrected, "./Data/JPEK/dat-residual-corrected.csv")
 
 ```
 
