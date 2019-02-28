@@ -9,6 +9,8 @@ package.check <- lapply(packages, FUN = function(x) {
 })
 
 mod <-  readRDS("mod4_brm.RDS") # Change to wherever the .RDS is saved <<<<<<<<<<
+modDat <- 
+  
 
 plot_me <- plot(marginal_effects(mod, effects = "c_Precip"), method = "fitted", plot = FALSE)
 # I'll need this output
