@@ -54,6 +54,7 @@ RichnessByTrans <- TempDat %>%
   group_by(HostName) %>%
   summarize(ParRich = sum(!is.na(ParName)),
             ParRich_Close = sum(ParTrans_Close, na.rm = TRUE))
+
 RichnessByParType <- TempDat %>%
   select(HostName, ParType) %>%
   group_by(HostName, ParType) %>%

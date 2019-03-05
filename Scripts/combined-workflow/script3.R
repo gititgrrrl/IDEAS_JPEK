@@ -27,8 +27,11 @@ carnDat %<>% filter(!(is.na(carnGrp))) %>% select(-Groupsize)
 
 # --- join with rest of data ---
 
-datNew <- right_join(carnDat,dat, by="hostName")
+datNew <- right_join(carnDat,dat, by="hostName") %>%
+  rename(groupSizePriUng = comGrpSize,  # primates and ungulates
+         groupSizeCar = carnGrp)
 
 # ---
+
 write_csv(datNew, "./Data/JPEK/script3.csv")
 

@@ -1,4 +1,4 @@
-# initial GMPD clean script in workflow which tallies parasite spp richness
+# initial GMPD clean script in workflow 
 # but multiple inclusion exclusion criteria to be performed still...
 
 # ---- 
@@ -24,7 +24,8 @@ GMPD <- GMPD_raw %>%
   rename(hostName=HostCorrectedName, parasiteName=ParasiteCorrectedName, hostGroup=Group,
          parType=ParType, parPhylum=ParPhylum, prevalence=Prevalence, 
          hostsSampled=HostsSampled, samplingType=SamplingType, 
-         hostEnvironment=HostEnvironment, citation=Citation) 
+         hostEnvironment=HostEnvironment, citation=Citation) %>%
+  filter(parType!="Prion", parType!="Fungus")
 
 # --- select currently required columns gmpd data
 
@@ -33,20 +34,10 @@ GMPD %<>% select(hostGroup, hostName, parasiteName,
                  hostsSampled, samplingType, 
                  hostEnvironment, citation)
 
-parTraits <- GMPD_par_traits_raw %>% rename(parasiteName=ParasiteCorrectedName)
+parTraits <- GMPD_par_traits_raw %>% rename(parasiteName=ParasiteCorrectedName, 
+                                            parTransClose = close)
 
 GMPD <- left_join(GMPD, parTraits, by="parasiteName")
-
-# --- tally parasite richness (NEEDS WORK SEE ABOVE) ---- 
-
-par_rich <- GMPD %>%
-  group_by(hostName, parasiteName) %>%
-  distinct() %>% # to get distinct host parasite pairs
-  group_by(hostName) %>%
-  tally() %>% # to get parasite richness for each host
-  rename(parRich = n)
-
-GMPD %<>% full_join(par_rich, by = "hostName")
 
 # ---- 
 
