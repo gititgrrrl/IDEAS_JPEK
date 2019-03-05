@@ -22,7 +22,9 @@ download.file(url = "http://esapubs.org/archive/ecol/E090/184/PanTHERIA_1-0_WR93
 LH <- read_delim("~/Google Drive/GMPD/GlobalParasites/Data/LH/LH.txt", "\t", escape_double = FALSE, na = "-999", trim_ws = TRUE) # Set NA's to -999
 
 LH_sub <- LH[, c(5, 6, 18, 23, 29, 32, 41, 44, 47)] # create a new data frame with a subset of the columns
-names(LH_sub) <- c("HostName", "HostActivCycle", "HostHomeRange", "HostMaxLifespan", "HostGroupSize", "HostTrophic", "HostSpeciesRange", "HostMeanLat", "HostMeanLong")
+names(LH_sub) <- c("HostName", "HostActivCycle", "HostHomeRange", 
+                   "HostMaxLifespan", "HostGroupSize", "HostTrophic", 
+                   "HostSpeciesRange", "HostMeanLat", "HostMeanLong")
 LH_sub$HostName <- gsub(" ", "_", LH_sub$HostName) # replace space with underscore
 LH_sub %<>% 
   mutate(HostActivCycle = factor(HostActivCycle, labels = c("nocturnal", "crepuscular", "diurnal")),
