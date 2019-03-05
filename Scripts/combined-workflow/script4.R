@@ -5,7 +5,7 @@
 library(tidyverse)
 library(magrittr)
 
-# --- load combined data from all sources (cleaned and joined in scripts 0-3)
+# --- load combined data from all sources (cleaned and joined in scripts 0-3) ---
 
 rm(list=ls())
 dat <- read_csv("~/Desktop/IDEAS_JPEK/Data/JPEK/script3.csv")
@@ -57,4 +57,4 @@ datFinal$groupSizePriUng[is.nan(datFinal$groupSizePriUng)] <- NA
 
 # ---
 
-write_csv(dat, "./Data/JPEK/script4.csv")
+write_csv(datFinal, "./Data/JPEK/script4.csv")
