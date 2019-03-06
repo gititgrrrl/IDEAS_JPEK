@@ -92,13 +92,13 @@ simplePredict_close <- predict(simpleBrm_close)
 
 simpleDat_nonclose <- allDat %>%
   select(hostName, parRich, parRich_close, numHostCitations, combIUCN, hostGroup) %>%
-  mutate(parRich_nonclose=(parRich-parRich_close)) %>% select(-parRich, -parRich_nonclose)
+  mutate(parRich_nonclose=(parRich-parRich_close)) %>% select(-parRich, -parRich_close)
 simpleDat_nonclose <- simpleDat_nonclose[complete.cases(simpleDat_nonclose),]     
 
 # --- run simple model NON CLOSE PARASITES ---
 
 simpleBrm_nonclose <- brm(
-  data = simpleDat_close, 
+  data = simpleDat_nonclose, 
   family = poisson,
   formula = bf(parRich_nonclose | trunc(lb = 1) ~
                  combIUCN * hostGroup + 
