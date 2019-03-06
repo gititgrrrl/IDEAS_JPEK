@@ -38,7 +38,7 @@ allDat <- read_csv("Data/JPEK/script4.csv") # columns 28 & 29 = # host and paras
 
 simpleDat <- allDat %>%
   select(hostName, parRich, numHostCitations, combIUCN, hostGroup) 
-simpleDat <- simpleDat[complete.cases(simpleDat),]                 # 408 records
+simpleDat <- data.frame(simpleDat[complete.cases(simpleDat),])                 # 408 records
 
 # --- run simple model ALL PARASITE TYPES---
 
@@ -66,8 +66,9 @@ simplePredict <- predict(simpleBrm)
 # --- subset data for simple model CLOSE PARASITES --- 
 
 simpleDat_close <- allDat %>%
-  select(hostName, parRich_close, numHostCitations, combIUCN, hostGroup) 
-simpleDat_close <- simpleDat_close[complete.cases(simpleDat_close),]     
+  select(hostName, parRich_close, numHostCitations, combIUCN, hostGroup) %>%
+  filter(parRich_close > 0)
+simpleDat_close <- data.frame(simpleDat_close[complete.cases(simpleDat_close),])     
 
 # --- run simple model CLOSE PARASITES ---
 
@@ -92,7 +93,8 @@ simplePredict_close <- predict(simpleBrm_close)
 
 simpleDat_nonclose <- allDat %>%
   select(hostName, parRich, parRich_close, numHostCitations, combIUCN, hostGroup) %>%
-  mutate(parRich_nonclose=(parRich-parRich_close)) %>% select(-parRich, -parRich_close)
+  mutate(parRich_nonclose=(parRich-parRich_close)) %>% select(-parRich, -parRich_close)  %>%
+  filter(parRich_nonclose > 0)
 simpleDat_nonclose <- simpleDat_nonclose[complete.cases(simpleDat_nonclose),]     
 
 # --- run simple model NON CLOSE PARASITES ---
@@ -118,7 +120,10 @@ simplePredict_nonclose <- predict(simpleBrm_nonclose)
 
 simpleDat_micro <- allDat %>%
   select(hostName, numHostCitations, combIUCN, hostGroup, bacteriaRich, virusRich, protozoaRich) %>%
-  mutate(parRich_micro=(bacteriaRich + virusRich + protozoaRich)) %>% select(-bacteriaRich, -virusRich, -protozoaRich)
+  mutate(parRich_micro=(bacteriaRich + virusRich + protozoaRich)) %>% 
+  select(-bacteriaRich, -virusRich, -protozoaRich)%>%
+  filter(parRich_micro> 0)
+
 simpleDat_micro <- simpleDat_micro[complete.cases(simpleDat_micro),]    # 447 
 
 # --- run simple model MICROSPARASITES---
@@ -144,7 +149,9 @@ simplePredict_micro <- predict(simpleBrm_micro)
 
 simpleDat_macro <- allDat %>%
   select(hostName, numHostCitations, combIUCN, hostGroup, helminthRich, arthropodRich) %>%
-  mutate(parRich_macro=(helminthRich + arthropodRich)) %>% select(-helminthRich, -arthropodRich)
+  mutate(parRich_macro=(helminthRich + arthropodRich)) %>% 
+  select(-helminthRich, -arthropodRich)%>%
+  filter(parRich_macro> 0)
 simpleDat_macro <- simpleDat_macro[complete.cases(simpleDat_macro),]    # 408 
 
 # --- run simple model MACROSPARASITES---
