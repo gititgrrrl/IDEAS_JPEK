@@ -39,7 +39,7 @@ allDat <- read_csv("Data/JPEK/script4.csv") # columns 28 & 29 = # host and paras
 simpleDat <- allDat %>%
   select(hostName, parRich, numHostCitations, combIUCN, hostGroup) %>%
   distinct()
-simpleDat <- data.frame(simpleDat[complete.cases(simpleDat),])                 # 408 records
+simpleDat <- data.frame(simpleDat[complete.cases(simpleDat),])                 # 362 hosts
 
 # --- run simple model ALL PARASITE TYPES---
 
@@ -57,8 +57,8 @@ simpleBrm <- brm(
   control = list(adapt_delta = .8, max_treedepth = 10)) 
 
 # add information criteria
-simpleBrm <- add_ic(simpleBrm, ic = "loo", reloo = TRUE)  
-simpleBrm <- add_ic(simpleBrm, ic = "kfold")
+# simpleBrm <- add_ic(simpleBrm, ic = "loo", reloo = TRUE)  
+# simpleBrm <- add_ic(simpleBrm, ic = "kfold")
 
 # model fits and predictions
 simpleMu <- fitted(simpleBrm)
@@ -70,7 +70,7 @@ simpleDat_close <- allDat %>%
   select(hostName, parRich_close, numHostCitations, combIUCN, hostGroup) %>%
   filter(parRich_close > 0) %>%
   distinct()
-simpleDat_close <- data.frame(simpleDat_close[complete.cases(simpleDat_close),])     # 300
+simpleDat_close <- data.frame(simpleDat_close[complete.cases(simpleDat_close),])     # 251
 
 # --- run simple model CLOSE PARASITES ---
 
@@ -84,8 +84,8 @@ simpleBrm_close <- brm(
   control = list(adapt_delta = .8, max_treedepth = 10)) 
 
 # add information criteria
-simpleBrm_close <- add_ic(simpleBrm_close, ic = "loo", reloo = TRUE)  
-simpleBrm_close <- add_ic(simpleBrm_close, ic = "kfold")
+# simpleBrm_close <- add_ic(simpleBrm_close, ic = "loo", reloo = TRUE)  
+# simpleBrm_close <- add_ic(simpleBrm_close, ic = "kfold")
 
 # model fits and predictions
 simpleMu_close <- fitted(simpleBrm_close)
@@ -98,7 +98,7 @@ simpleDat_nonclose <- allDat %>%
   mutate(parRich_nonclose=(parRich-parRich_close)) %>% select(-parRich, -parRich_close)  %>%
   filter(parRich_nonclose > 0) %>%
   distinct()
-simpleDat_nonclose <- simpleDat_nonclose[complete.cases(simpleDat_nonclose),]     # 367
+simpleDat_nonclose <- simpleDat_nonclose[complete.cases(simpleDat_nonclose),]     # 334
 
 # --- run simple model NON CLOSE PARASITES ---
 
@@ -128,7 +128,7 @@ simpleDat_micro <- allDat %>%
   filter(parRich_micro> 0) %>%
   distinct()
 
-simpleDat_micro <- simpleDat_micro[complete.cases(simpleDat_micro),]    # 312 
+simpleDat_micro <- simpleDat_micro[complete.cases(simpleDat_micro),]    # 298 
 
 # --- run simple model MICROSPARASITES---
 
@@ -157,7 +157,7 @@ simpleDat_macro <- allDat %>%
   select(-helminthRich, -arthropodRich)%>%
   filter(parRich_macro> 0) %>%
   distinct()
-simpleDat_macro <- simpleDat_macro[complete.cases(simpleDat_macro),]    # 345
+simpleDat_macro <- simpleDat_macro[complete.cases(simpleDat_macro),]    # 291
 
 # --- run simple model MACROSPARASITES---
 
@@ -199,3 +199,16 @@ saveRDS(simplePredict_micro, "./Data/JPEK/simple/simple_brm_micro_predict.RDS")
 saveRDS(simpleBrm_macro, "./Data/JPEK/simple/simple_brm_macro.RDS") #   model of macro spp richness
 saveRDS(simpleMu_macro, "./Data/JPEK/simple/simple_brm_macro_mu.RDS")
 saveRDS(simplePredict_macro, "./Data/JPEK/simple/simple_brm_macro_predict.RDS")
+
+simple_me <- plot(marginal_effects(simpleBrm), method = "fitted", plot = FALSE)
+simple_me_close <- plot(marginal_effects(simpleBrm_close), method = "fitted", plot = FALSE)
+simple_me_nonclose <- plot(marginal_effects(simpleBrm_nonclose), method = "fitted", plot = FALSE)
+simple_me_mic <- plot(marginal_effects(simpleBrm_micro), method = "fitted", plot = FALSE)
+simple_me_mac <- plot(marginal_effects(simpleBrm_macro), method = "fitted", plot = FALSE)
+
+saveRDS(simple_me, "./Data/JPEK/simple/simple_brm_me.RDS")
+saveRDS(simple_me_close, "./Data/JPEK/simple/simple_brm_me_close.RDS")
+saveRDS(simple_me_nonclose, "./Data/JPEK/simple/simple_brm_me_nonclose.RDS")
+saveRDS(simple_me_mic, "./Data/JPEK/simple/simple_brm_me_micro.RDS")
+saveRDS(simple_me_mac, "./Data/JPEK/simple/simple_brm_me_macro.RDS")
+

@@ -8,7 +8,7 @@ library(magrittr)
 # --- load combined data from all sources (cleaned and joined in scripts 0-3) ---
 
 rm(list=ls())
-dat <- read_csv("~/Desktop/IDEAS_JPEK/Data/JPEK/script3.csv")
+dat <- read_csv("Data/JPEK/script3.csv")
 
 # --- adding variables for citation/sampling bias ---
 

@@ -27,22 +27,14 @@ GMPD <- GMPD_raw %>%
          hostsSampled=HostsSampled, samplingType=SamplingType, 
          hostEnvironment=HostEnvironment, citation=Citation) 
 
-### --- filter data by exclusion criteria --- ###
-
-isMissingDf <- GMPD %>% 
-  filter(HasBinomialName=="no") %>%
-  filter(parasiteName != "ABOLISHED") %>%
-  filter(parasiteName != "not identified to genus") %>%
-  filter(parasiteName != "SPLITTED in ICTV") %>%
-  select(hostName, parasiteName) %>%
-  distinct()
-  
+### --- filter data by inclusion/exclusion criteria --- ###
 
 GMPD %<>% 
+  filter(parasiteName != "ABOLISHED", 
+         parasiteName != "not identified to genus", 
+         parasiteName != "SPLITTED in ICTV") %>% 
   filter(prevalence>0) %>% # parasite prevalence greater than 0
   filter(parType!="Fungus") 
-
-### --- ADD IN INCLUSION OF PARASIETS WITH UNIQUE GENERA PER HOST --- ###
 
 # --- select currently required columns gmpd data
 
