@@ -15,7 +15,7 @@ gmpd <- read.csv("./Data/GMPD/GMPD_main.csv") # Rows are unique observations of 
 eid2 <- read.csv("./Data/EID2/SpeciesInteractions_EID2.csv")
 
 # restrict to species-level traits of hosts and parasites
-gmpd_spp <- gmpd %>% filter(HasBinomialName == "yes") %>% 
+gmpd_spp <- gmpd %>% filter(HasBinomialName == "yes", ParasiteCorrectedName != c("ABOLISHED", "not identified to genus", "SPLITTED in ICTV")) %>% 
   select(HostGroup=Group, 
          HostName=HostCorrectedName, 
          HostOrder, HostFamily, 
@@ -24,12 +24,34 @@ gmpd_spp <- gmpd %>% filter(HasBinomialName == "yes") %>%
          ParType, ParPhylum, ParClass) %>% 
   mutate(HostParPair = paste(HostName, ParName, sep = ", ")) 
 
+
+
+gmpd_genus <- gmpd %>% filter(HasBinomialName == "no", ParasiteCorrectedName != c("ABOLISHED", "not identified to genus", "SPLITTED in ICTV")) %>% 
+  select(HostGroup=Group, 
+         HostName=HostCorrectedName, 
+         HostOrder, HostFamily, 
+         HostEnvironment, 
+         ParName=ParasiteCorrectedName, 
+         ParType, ParPhylum, ParClass) %>% 
+  mutate(HostParPair = paste(HostName, ParName, sep = ", "))
+
+
 # create dataset of unique host-parasite pairs
-gmpd_pairs <- gmpd_spp %>% 
+gmpd_pairs_hbnYES <- gmpd_spp %>% 
   select(HostName, ParName, HostParPair) %>% 
   distinct()
 ## save as csv
 #write.csv(gmpd_pairs, "./Data/JPEK/GMPD_pairs.csv")
+
+gmpd_pairs_hbnNO <- gmpd_genus %>% 
+  select(HostName, ParName, HostParPair) %>% 
+  distinct()
+
+allpairs <- as.data.frame(union(gmpd_pairs_hbnYES$HostParPair, gmpd_pairs_hbnNO$HostParPair))
+
+gmpd_chaos <- left_join(gmpd_pairs_hbnYES, gmpd_pairs_hbnNO, by = "HostName")
+
+setdiff(gmpd_pairs_hbnNO$HostName, gmpd_pairs_hbnYES$HostName)
 
 # calculate host range for each parasite spp
 ParsHostRange <- as.data.frame(table(gmpd_pairs$ParName)) %>% 
