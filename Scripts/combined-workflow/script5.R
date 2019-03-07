@@ -70,7 +70,7 @@ simpleDat_close <- allDat %>%
   select(hostName, parRich_close, numHostCitations, combIUCN, hostGroup) %>%
   filter(parRich_close > 0) %>%
   distinct()
-simpleDat_close <- data.frame(simpleDat_close[complete.cases(simpleDat_close),])     
+simpleDat_close <- data.frame(simpleDat_close[complete.cases(simpleDat_close),])     # 300
 
 # --- run simple model CLOSE PARASITES ---
 
@@ -98,7 +98,7 @@ simpleDat_nonclose <- allDat %>%
   mutate(parRich_nonclose=(parRich-parRich_close)) %>% select(-parRich, -parRich_close)  %>%
   filter(parRich_nonclose > 0) %>%
   distinct()
-simpleDat_nonclose <- simpleDat_nonclose[complete.cases(simpleDat_nonclose),]     
+simpleDat_nonclose <- simpleDat_nonclose[complete.cases(simpleDat_nonclose),]     # 367
 
 # --- run simple model NON CLOSE PARASITES ---
 
@@ -128,7 +128,7 @@ simpleDat_micro <- allDat %>%
   filter(parRich_micro> 0) %>%
   distinct()
 
-simpleDat_micro <- simpleDat_micro[complete.cases(simpleDat_micro),]    # 447 
+simpleDat_micro <- simpleDat_micro[complete.cases(simpleDat_micro),]    # 312 
 
 # --- run simple model MICROSPARASITES---
 
@@ -157,7 +157,7 @@ simpleDat_macro <- allDat %>%
   select(-helminthRich, -arthropodRich)%>%
   filter(parRich_macro> 0) %>%
   distinct()
-simpleDat_macro <- simpleDat_macro[complete.cases(simpleDat_macro),]    # 408 
+simpleDat_macro <- simpleDat_macro[complete.cases(simpleDat_macro),]    # 345
 
 # --- run simple model MACROSPARASITES---
 
@@ -182,7 +182,7 @@ simplePredict_macro <- predict(simpleBrm_macro)
 
 saveRDS(simpleBrm, "./Data/JPEK/simple/simple_brm_all.RDS") # model of parasite spp richness total
 saveRDS(simpleMu, "./Data/JPEK/simple/simple_brm_all_mu.RDS")
-saveRDS(simplePredict, "./Data/simple/JPEK/simple_brm_all_predict.RDS")
+saveRDS(simplePredict, "./Data/JPEK/simple/simple_brm_all_predict.RDS")
 
 saveRDS(simpleBrm_close, "./Data/JPEK/simple/simple_brm_close.RDS") #   model of closely transmitted parasite spp richness 
 saveRDS(simpleMu_close, "./Data/JPEK/simple/simple_brm_close_mu.RDS")
@@ -193,7 +193,7 @@ saveRDS(simpleMu_nonclose, "./Data/JPEK/simple/simple_brm_nonclose_mu.RDS")
 saveRDS(simplePredict_nonclose, "./Data/JPEK/simple/simple_brm_nonclose_predict.RDS")
 
 saveRDS(simpleBrm_micro, "./Data/JPEK/simple/simple_brm_micro.RDS") #   model of micro spp richness 
-aveRDS(simpleMu_micro, "./Data/JPEK/simple/simple_brm_micro_mu.RDS")
+saveRDS(simpleMu_micro, "./Data/JPEK/simple/simple_brm_micro_mu.RDS")
 saveRDS(simplePredict_micro, "./Data/JPEK/simple/simple_brm_micro_predict.RDS")
 
 saveRDS(simpleBrm_macro, "./Data/JPEK/simple/simple_brm_macro.RDS") #   model of macro spp richness
