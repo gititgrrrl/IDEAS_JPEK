@@ -16,16 +16,31 @@ rm(list=ls())
 GMPD_raw <- read_csv("Data/GMPD/GMPD_main.csv") # main file
 GMPD_par_traits_raw <- read_csv("Data/GMPD/GMPD_parasite_traits.csv")
 
+
 # --- initial GMPD Cleaning (NEEDS WORK SEE ABOVE) -----
 
 GMPD <- GMPD_raw %>% 
-  filter(HasBinomialName == "yes") %>% 
   mutate(HostCorrectedName=gsub(pattern=" ", x=HostCorrectedName, replacement = "_")) %>%
-  rename(hostName=HostCorrectedName, parasiteName=ParasiteCorrectedName, hostGroup=Group,
+  rename(hostName=HostCorrectedName, parasiteName=ParasiteCorrectedName,
+         hostGroup=Group,
          parType=ParType, parPhylum=ParPhylum, prevalence=Prevalence, 
          hostsSampled=HostsSampled, samplingType=SamplingType, 
-         hostEnvironment=HostEnvironment, citation=Citation) %>%
-  filter(parType!="Prion", parType!="Fungus")
+         hostEnvironment=HostEnvironment, citation=Citation) 
+
+### --- filter data by exclusion criteria --- ###
+
+wellStudiedHosts <- GMPD %>% 
+  group_by(hostName) %>% 
+  count() %>%
+  filter(n>3) %>% 
+  data.frame() 
+
+GMPD %<>% 
+  filter(hostName %in% wellStudiedHosts$hostName) %>% # well studied hosts with more than 3 citations including zero prevalence data
+  filter(prevalence>0) # parasite prevalence greater than 0
+
+# * filter out fungus now?
+# * HELP: DEAL WITH PARASITES WITHOUT BINOMIAL NAME 
 
 # --- select currently required columns gmpd data
 
