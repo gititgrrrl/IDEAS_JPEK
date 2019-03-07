@@ -37,7 +37,8 @@ allDat <- read_csv("Data/JPEK/script4.csv") # columns 28 & 29 = # host and paras
 # --- subset data for simple model ALL PARASITE TYPES --- 
 
 simpleDat <- allDat %>%
-  select(hostName, parRich, numHostCitations, combIUCN, hostGroup) 
+  select(hostName, parRich, numHostCitations, combIUCN, hostGroup) %>%
+  distinct()
 simpleDat <- data.frame(simpleDat[complete.cases(simpleDat),])                 # 408 records
 
 # --- run simple model ALL PARASITE TYPES---
@@ -67,7 +68,8 @@ simplePredict <- predict(simpleBrm)
 
 simpleDat_close <- allDat %>%
   select(hostName, parRich_close, numHostCitations, combIUCN, hostGroup) %>%
-  filter(parRich_close > 0)
+  filter(parRich_close > 0) %>%
+  distinct()
 simpleDat_close <- data.frame(simpleDat_close[complete.cases(simpleDat_close),])     
 
 # --- run simple model CLOSE PARASITES ---
@@ -78,7 +80,7 @@ simpleBrm_close <- brm(
   formula = bf(parRich_close | trunc(lb = 1) ~
                  combIUCN * hostGroup + 
                  numHostCitations),
-  iter = 4000, warmup = 2000, chains = 4, cores = 4,
+  iter = 4000, warmup = 2000, chains = 4, cores = 8,
   control = list(adapt_delta = .8, max_treedepth = 10)) 
 
 # add information criteria
@@ -94,7 +96,8 @@ simplePredict_close <- predict(simpleBrm_close)
 simpleDat_nonclose <- allDat %>%
   select(hostName, parRich, parRich_close, numHostCitations, combIUCN, hostGroup) %>%
   mutate(parRich_nonclose=(parRich-parRich_close)) %>% select(-parRich, -parRich_close)  %>%
-  filter(parRich_nonclose > 0)
+  filter(parRich_nonclose > 0) %>%
+  distinct()
 simpleDat_nonclose <- simpleDat_nonclose[complete.cases(simpleDat_nonclose),]     
 
 # --- run simple model NON CLOSE PARASITES ---
@@ -105,7 +108,7 @@ simpleBrm_nonclose <- brm(
   formula = bf(parRich_nonclose | trunc(lb = 1) ~
                  combIUCN * hostGroup + 
                  numHostCitations),
-  iter = 4000, warmup = 2000, chains = 4, cores = 4,
+  iter = 4000, warmup = 2000, chains = 4, cores = 8,
   control = list(adapt_delta = .8, max_treedepth = 10)) 
 
 # add information criteria
@@ -122,7 +125,8 @@ simpleDat_micro <- allDat %>%
   select(hostName, numHostCitations, combIUCN, hostGroup, bacteriaRich, virusRich, protozoaRich) %>%
   mutate(parRich_micro=(bacteriaRich + virusRich + protozoaRich)) %>% 
   select(-bacteriaRich, -virusRich, -protozoaRich)%>%
-  filter(parRich_micro> 0)
+  filter(parRich_micro> 0) %>%
+  distinct()
 
 simpleDat_micro <- simpleDat_micro[complete.cases(simpleDat_micro),]    # 447 
 
@@ -134,7 +138,7 @@ simpleBrm_micro <- brm(
   formula = bf(parRich_micro | trunc(lb = 1) ~
                  combIUCN * hostGroup + 
                  numHostCitations),
-  iter = 4000, warmup = 2000, chains = 4, cores = 4,
+  iter = 4000, warmup = 2000, chains = 4, cores = 8,
   control = list(adapt_delta = .8, max_treedepth = 10)) 
 
 # add information criteria
@@ -151,7 +155,8 @@ simpleDat_macro <- allDat %>%
   select(hostName, numHostCitations, combIUCN, hostGroup, helminthRich, arthropodRich) %>%
   mutate(parRich_macro=(helminthRich + arthropodRich)) %>% 
   select(-helminthRich, -arthropodRich)%>%
-  filter(parRich_macro> 0)
+  filter(parRich_macro> 0) %>%
+  distinct()
 simpleDat_macro <- simpleDat_macro[complete.cases(simpleDat_macro),]    # 408 
 
 # --- run simple model MACROSPARASITES---
@@ -162,7 +167,7 @@ simpleBrm_macro <- brm(
   formula = bf(parRich_macro | trunc(lb = 1) ~
                  combIUCN * hostGroup + 
                  numHostCitations),
-  iter = 4000, warmup = 2000, chains = 4, cores = 4,
+  iter = 4000, warmup = 2000, chains = 4, cores = 8,
   control = list(adapt_delta = .8, max_treedepth = 10)) 
 
 # add information criteria
@@ -175,22 +180,22 @@ simplePredict_macro <- predict(simpleBrm_macro)
 
 # --- 
 
-saveRDS(simpleBrm, "./Data/JPEK/simple_brm_all.RDS") # model of parasite spp richness total
+saveRDS(simpleBrm, "./Data/JPEK/simple/simple_brm_all.RDS") # model of parasite spp richness total
 saveRDS(simpleMu, "./Data/JPEK/simple_brm_all_mu.RDS")
 saveRDS(simplePredict, "./Data/JPEK/simple_brm_all_predict.RDS")
 
-saveRDS(simpleBrm_close, "./Data/JPEK/simple_brm_close.RDS") #   model of closely transmitted parasite spp richness 
+saveRDS(simpleBrm_close, "./Data/JPEK/simple/simple_brm_close.RDS") #   model of closely transmitted parasite spp richness 
 saveRDS(simpleMu_close, "./Data/JPEK/simple_brm_close_mu.RDS")
 saveRDS(simplePredict_close, "./Data/JPEK/simple_brm_close_predict.RDS")
 
-saveRDS(simpleBrm_nonclose, "./Data/JPEK/simple_brm_nonclose.RDS") #   model of NON closely transmitted parasite spp richness 
-saveRDS(simpleMu_nonclose, "./Data/JPEK/simple_brm_nonclose_mu.RDS")
-saveRDS(simplePredict_nonclose, "./Data/JPEK/simple_brm_nonclose_predict.RDS")
+saveRDS(simpleBrm_nonclose, "./Data/JPEK/simple/simple_brm_nonclose.RDS") #   model of NON closely transmitted parasite spp richness 
+saveRDS(simpleMu_nonclose, "./Data/JPEK/simple/simple_brm_nonclose_mu.RDS")
+saveRDS(simplePredict_nonclose, "./Data/JPEK/simple/simple_brm_nonclose_predict.RDS")
 
-saveRDS(simpleBrm_micro, "./Data/JPEK/simple_brm_micro.RDS") #   model of micro spp richness 
-aveRDS(simpleMu_micro, "./Data/JPEK/simple_brm_micro_mu.RDS")
-saveRDS(simplePredict_micro, "./Data/JPEK/simple_brm_micro_predict.RDS")
+saveRDS(simpleBrm_micro, "./Data/JPEK/simple/simple_brm_micro.RDS") #   model of micro spp richness 
+aveRDS(simpleMu_micro, "./Data/JPEK/simple/simple_brm_micro_mu.RDS")
+saveRDS(simplePredict_micro, "./Data/JPEK/simple/simple_brm_micro_predict.RDS")
 
-saveRDS(simpleBrm_macro, "./Data/JPEK/simple_brm_macro.RDS") #   model of macro spp richness
-aveRDS(simpleMu_macro, "./Data/JPEK/simple_brm_macro_mu.RDS")
-saveRDS(simplePredict_macro, "./Data/JPEK/simple_brm_macro_predict.RDS")
+saveRDS(simpleBrm_macro, "./Data/JPEK/simple/simple_brm_macro.RDS") #   model of macro spp richness
+aveRDS(simpleMu_macro, "./Data/JPEK/simple/simple_brm_macro_mu.RDS")
+saveRDS(simplePredict_macro, "./Data/JPEK/simple/simple_brm_macro_predict.RDS")
