@@ -142,8 +142,8 @@ simpleBrm_micro <- brm(
   control = list(adapt_delta = .8, max_treedepth = 10)) 
 
 # add information criteria
-simpleBrm_micro <- add_ic(simpleBrm_micro, ic = "loo", reloo = TRUE)  
-simpleBrm_micro <- add_ic(simpleBrm_micro, ic = "kfold")
+# simpleBrm_micro <- add_ic(simpleBrm_micro, ic = "loo", reloo = TRUE)  
+# simpleBrm_micro <- add_ic(simpleBrm_micro, ic = "kfold")
 
 # model fits and predictions
 simpleMu_micro <- fitted(simpleBrm_micro)
@@ -171,8 +171,8 @@ simpleBrm_macro <- brm(
   control = list(adapt_delta = .8, max_treedepth = 10)) 
 
 # add information criteria
-simpleBrm_macro <- add_ic(simpleBrm_macro, ic = "loo", reloo = TRUE)  
-simpleBrm_macro <- add_ic(simpleBrm_macro, ic = "kfold")
+# simpleBrm_macro <- add_ic(simpleBrm_macro, ic = "loo", reloo = TRUE)  
+# simpleBrm_macro <- add_ic(simpleBrm_macro, ic = "kfold")
 
 # model fits and predictions
 simpleMu_macro <- fitted(simpleBrm_macro)
