@@ -29,11 +29,20 @@ GMPD <- GMPD_raw %>%
 
 ### --- filter data by exclusion criteria --- ###
 
-GMPD %<>% 
-  filter(prevalence>0) # parasite prevalence greater than 0
+isMissingDf <- GMPD %>% 
+  filter(HasBinomialName=="no") %>%
+  filter(parasiteName != "ABOLISHED") %>%
+  filter(parasiteName != "not identified to genus") %>%
+  filter(parasiteName != "SPLITTED in ICTV") %>%
+  select(hostName, parasiteName) %>%
+  distinct()
+  
 
-# * filter out fungus now?
-# * HELP: DEAL WITH PARASITES WITHOUT BINOMIAL NAME 
+GMPD %<>% 
+  filter(prevalence>0) %>% # parasite prevalence greater than 0
+  filter(parType!="Fungus") 
+
+### --- ADD IN INCLUSION OF PARASIETS WITH UNIQUE GENERA PER HOST --- ###
 
 # --- select currently required columns gmpd data
 
