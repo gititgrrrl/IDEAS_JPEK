@@ -197,5 +197,5 @@ saveRDS(simpleMu_micro, "./Data/JPEK/simple/simple_brm_micro_mu.RDS")
 saveRDS(simplePredict_micro, "./Data/JPEK/simple/simple_brm_micro_predict.RDS")
 
 saveRDS(simpleBrm_macro, "./Data/JPEK/simple/simple_brm_macro.RDS") #   model of macro spp richness
-aveRDS(simpleMu_macro, "./Data/JPEK/simple/simple_brm_macro_mu.RDS")
+saveRDS(simpleMu_macro, "./Data/JPEK/simple/simple_brm_macro_mu.RDS")
 saveRDS(simplePredict_macro, "./Data/JPEK/simple/simple_brm_macro_predict.RDS")
