@@ -112,8 +112,8 @@ simpleBrm_nonclose <- brm(
   control = list(adapt_delta = .8, max_treedepth = 10)) 
 
 # add information criteria
-simpleBrm_nonclose <- add_ic(simpleBrm_nonclose, ic = "loo", reloo = TRUE)  
-simpleBrm_nonclose <- add_ic(simpleBrm_nonclose, ic = "kfold")
+# simpleBrm_nonclose <- add_ic(simpleBrm_nonclose, ic = "loo", reloo = TRUE)  
+# simpleBrm_nonclose <- add_ic(simpleBrm_nonclose, ic = "kfold")
 
 # model fits and predictions
 simpleMu_nonclose <- fitted(simpleBrm_nonclose)
@@ -181,12 +181,12 @@ simplePredict_macro <- predict(simpleBrm_macro)
 # --- 
 
 saveRDS(simpleBrm, "./Data/JPEK/simple/simple_brm_all.RDS") # model of parasite spp richness total
-saveRDS(simpleMu, "./Data/JPEK/simple_brm_all_mu.RDS")
-saveRDS(simplePredict, "./Data/JPEK/simple_brm_all_predict.RDS")
+saveRDS(simpleMu, "./Data/JPEK/simple/simple_brm_all_mu.RDS")
+saveRDS(simplePredict, "./Data/simple/JPEK/simple_brm_all_predict.RDS")
 
 saveRDS(simpleBrm_close, "./Data/JPEK/simple/simple_brm_close.RDS") #   model of closely transmitted parasite spp richness 
-saveRDS(simpleMu_close, "./Data/JPEK/simple_brm_close_mu.RDS")
-saveRDS(simplePredict_close, "./Data/JPEK/simple_brm_close_predict.RDS")
+saveRDS(simpleMu_close, "./Data/JPEK/simple/simple_brm_close_mu.RDS")
+saveRDS(simplePredict_close, "./Data/JPEK/simple/simple_brm_close_predict.RDS")
 
 saveRDS(simpleBrm_nonclose, "./Data/JPEK/simple/simple_brm_nonclose.RDS") #   model of NON closely transmitted parasite spp richness 
 saveRDS(simpleMu_nonclose, "./Data/JPEK/simple/simple_brm_nonclose_mu.RDS")
