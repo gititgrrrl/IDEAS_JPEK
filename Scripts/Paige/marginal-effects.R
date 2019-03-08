@@ -27,5 +27,6 @@ top <- allp
 bot <- plot_grid(plotlist = list(close, nonclose, micro, macro), 
           labels = c("B", "C", "D", "E"), 
            ncol=2, nrow=2)
-
+pdf("./Results/richness_me_plot.pdf") 
 plot_grid(allp, bot, nrow=2, labels=c("A"))
+dev.off()
