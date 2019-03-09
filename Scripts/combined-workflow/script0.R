@@ -33,8 +33,8 @@ GMPD %<>%
   filter(parasiteName != "ABOLISHED", 
          parasiteName != "not identified to genus", 
          parasiteName != "SPLITTED in ICTV") %>% 
-  filter(prevalence>0) %>% # parasite prevalence greater than 0
-  filter(parType!="Fungus") 
+  filter(prevalence>0) # parasite prevalence greater than 0
+  # filter(parType!="Fungus") # (Ellen) since we are grouping to micro- and macro-parasites, no reason to exclude
 
 # --- select currently required columns gmpd data
 
@@ -43,8 +43,8 @@ GMPD %<>% select(hostGroup, hostName, parasiteName,
                  hostsSampled, samplingType, 
                  hostEnvironment, citation)
 
-parTraits <- GMPD_par_traits_raw %>% rename(parasiteName=ParasiteCorrectedName, 
-                                            parTransClose = close)
+parTraits <- GMPD_par_traits_raw %>% rename(parasiteName=ParasiteCorrectedName) %>%
+  mutate(parTransCloseOnly = as.numeric(close==1 & nonclose==0 & vector==0 & intermediate==0)) # (Ellen changed) these are the ones that are transmitted ONLY by direct contact
 
 GMPD <- left_join(GMPD, parTraits, by="parasiteName")
 

@@ -47,7 +47,8 @@ pan <- pan_raw %>%
 tmp <- pan %>%
   select(hostName, popGrpSize, socGrpSize) %>%
   rowwise() %>%
-  mutate(comGrpSize=mean(c(socGrpSize, popGrpSize), na.rm = TRUE))
+  mutate(comGrpSize=mean(c(socGrpSize, popGrpSize), na.rm = TRUE), # leaves some NaN
+         maxGrpSize=max(socGrpSize, popGrpSize, na.rm = TRUE)) # (Ellen) added this one as another meaningful way to consider group size--for double-check. Leaves some -Inf
 
 # --- join and clean host trait data with GMPD data --- 
 
@@ -56,7 +57,8 @@ pan <- right_join(pan, tmp, by="hostName")
 dat_combine <- right_join(pan, gmpd_iucn, by = "hostName")
 
 dat_combine %<>% select(-popGrpSize.x, -popGrpSize.y, -socGrpSize.x, -socGrpSize.y)
-
+dat_combine$maxGrpSize[is.infinite(dat_combine$maxGrpSize)] <- NA # (Ellen) just for consistent characterization of non-numbers
+dat_combine$comGrpSize[is.nan(dat_combine$comGrpSize)] <- NA
 # --- 
 
 write_csv(dat_combine, "./Data/JPEK/script2.csv")

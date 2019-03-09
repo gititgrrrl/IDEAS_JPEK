@@ -20,7 +20,7 @@ phyla <- select(phyla_raw, "Binomial.1.2", "Order.1.2", "Family.1.2",
          hostGenus=Genus.1.2,
          IUCN=IUCN.Status.1.2,
          massG=Mass.g) %>%
-  mutate(massG=massG/1000) %>%
+  mutate(massKG=massG/1000) %>% # (Ellen) changed colname to KG b/c dividing by 1000
   mutate(combIUCN = ifelse(IUCN %in% c("CR", "EN", "VU", "NT"), "threatened", ifelse(IUCN=="LC", "not_threatened", NA)))
 
 

@@ -21,17 +21,18 @@ dat %>%
 dat <- left_join(dat, hCitDf, by="hostName")
 
 # --- final cleaning to gather response variables and log transform variables for model --- 
-
+# (Ellen note) Once we add in the parasites coded only to genus, then 31% of the records don't have information on parasite transmission (whether it's direct transmission only or not). 
 tmp <- dat %>%
-  select(hostName, parasiteName, parTransClose, parType) %>%
+  select(hostName, parasiteName, parTransCloseOnly, parType) %>%
   distinct() # get distinct host - parasite pairs with transmission and type columns
 
-rich_trans <- tmp %>%  # data of parasite richness in total and # parasites that have close transmission
-  select(hostName, parasiteName, parTransClose) %>%
+rich_trans <- tmp %>%  # data of parasite richness in total and # parasites that have ONLY close transmission
+  select(hostName, parasiteName, parTransCloseOnly) %>%
   group_by(hostName) %>%
   summarize(parRich = sum(!is.na(parasiteName)),
-            parRich_close = sum(parTransClose, na.rm = TRUE)) %>%
-  mutate(propClose=parRich_close/parRich)
+            parRichCloseOnly = sum(parTransCloseOnly==1, na.rm = TRUE),
+            parRichNonClose = sum(parTransCloseOnly==0, na.rm = TRUE),
+            parRichTransKnown = sum(!is.na(parTransCloseOnly))) # <<<<<<<<<< (Ellen) 'CloseOnly' means the only way it's transmitted is by close contact; 'NonClose' means it can be transmitted by means other than close contact
 
 rich_type <- tmp %>%  # data of parasite richness by type
   select(hostName, parType) %>%
@@ -49,12 +50,10 @@ datFinal <- dat %>%
   left_join(rich_type, by = "hostName") %>%
   mutate_if(is.character, as.factor) %>%
   mutate(logParRich = log(parRich),
+         absHostMeanLat = abs(hostMeanLat),
          logHostSpeciesRange = log(hostSpeciesRange),
-         logHostMass = log(massG),
+         logHostMass = log(massKG),
          logNumHostCitations = log(numHostCitations))
-
-datFinal$groupSizePriUng[is.nan(datFinal$groupSizePriUng)] <- NA
-
 # ---
 
 write_csv(datFinal, "./Data/JPEK/script4.csv")
