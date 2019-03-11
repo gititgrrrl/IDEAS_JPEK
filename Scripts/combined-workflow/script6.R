@@ -64,7 +64,7 @@ fullBrm <- brm(
                  absHostMeanLat +
                  hostGroup:absHostMeanLat), 
   iter =4000, warmup = 2000, chains = 4, cores = 4,
-  control = list(adapt_delta = .8, max_treedepth = 10)) 
+  control = list(adapt_delta = .8, max_treedepth = 10))  # may wnat to increase max_tree depth although all converged
 
 # quick checks
 summary(fullBrm)
@@ -72,8 +72,8 @@ plot(fullBrm)
 pp_check(fullBrm, nsamples = 500)
 
 # add information criteria
-fullBrm <- add_ic(fullBrm, ic = "loo", reloo = TRUE)  
-fullBrm <- add_ic(fullBrm, ic = "kfold")
+# fullBrm <- add_ic(fullBrm, ic = "loo", reloo = TRUE)  
+# fullBrm <- add_ic(fullBrm, ic = "kfold")
 
 # model fits and predictions
 fullMu <- fitted(fullBrm)
@@ -105,8 +105,8 @@ plot(simpleBrm_fulldat)
 pp_check(simpleBrm_fulldat, nsamples = 500)
 
 # add information criteria
-simpleBrm_fulldat <- add_ic(simpleBrm_fulldat, ic = "loo", reloo = TRUE)
-simpleBrm_fulldat <- add_ic(simpleBrm_fulldat, ic = "kfold")
+# simpleBrm_fulldat <- add_ic(simpleBrm_fulldat, ic = "loo", reloo = TRUE)
+# simpleBrm_fulldat <- add_ic(simpleBrm_fulldat, ic = "kfold")
 
 # model fits and predictions
 simpleMu_fulldat <- fitted(simpleBrm_fulldat)
@@ -160,8 +160,8 @@ plot(fullBrm_parastrans)
 pp_check(fullBrm_parastrans, nsamples = 500)
 
 # add information criteria
-fullBrm_parastrans <- add_ic(fullBrm_parastrans, ic = "loo", reloo = TRUE)  
-fullBrm_parastrans <- add_ic(fullBrm_parastrans, ic = "kfold")
+# fullBrm_parastrans <- add_ic(fullBrm_parastrans, ic = "loo", reloo = TRUE)  
+# fullBrm_parastrans <- add_ic(fullBrm_parastrans, ic = "kfold")
 
 # model fits and predictions
 fullMu_parastrans <- fitted(fullBrm_parastrans)
