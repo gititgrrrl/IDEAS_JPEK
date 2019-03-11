@@ -34,7 +34,6 @@ GMPD %<>%
          parasiteName != "not identified to genus", 
          parasiteName != "SPLITTED in ICTV") %>% 
   filter(prevalence>0) # parasite prevalence greater than 0
-  # filter(parType!="Fungus") # (Ellen) since we are grouping to micro- and macro-parasites, no reason to exclude
 
 # --- select currently required columns gmpd data
 

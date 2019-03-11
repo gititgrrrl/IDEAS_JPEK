@@ -20,7 +20,6 @@ carnDat %<>%
 # --- make new column to manipulate ---
 
 carnDat$carnGrp <- carnDat$Groupsize
-# carnDat$carnGrp[carnDat$carnGrp == "Groups"|carnDat$carnGrp == "Pairs to family clans"|carnDat$carnGrp == "Solitary or groups"] <- "group" >>>> (Ellen) see replacement line below, including change of capitalization
 carnDat$carnGrp[carnDat$carnGrp %in% c("Groups", "Solitary or Groups", "Pairs to family clans", "Pairs to Groups")] <- "group" 
 carnDat$carnGrp[carnDat$carnGrp %in% c("Solitary", "Pairs", "Solitary or Pairs", "Solitary?", "Solitary to Pairs", "Pairs?")] <- "non_group"
 carnDat %<>% filter(!(is.na(carnGrp))) %>% select(-Groupsize)

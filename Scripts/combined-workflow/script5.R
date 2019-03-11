@@ -34,29 +34,15 @@ library(glmmTMB)
 rm(list=ls())
 allDat <- read_csv("Data/JPEK/script4.csv") # columns 28 & 29 = # host and parasite citations 
 
-# --- subset data for simple model ALL PARASITE TYPES --- 
+# --- subset data for simple model ALL PARASITES --- 
 
 simpleDat <- allDat %>%
   select(hostName, parRich, logNumHostCitations, combIUCN, hostGroup) %>% # <<<<< (Ellen) grab the logNumHostCitations (not numHostCitations)
   distinct()
 simpleDat <- simpleDat[complete.cases(simpleDat),]              # 362 hosts
 
-# --- run simple model ALL PARASITE TYPES---
+### --- Simple model on simple data --- ###
 
-# MOD 1 - ZERO TRUNCATED POISSON. FULL MODEL ----
-# > What we need is a one-inflated, zero-truncated Poisson!
-# > NOTES ON MODEL 1
-
-# simpleBrm <- brm(
-#   data = simpleDat, 
-#   family = poisson,
-#   formula = bf(parRich | trunc(lb = 1) ~
-#                  combIUCN * hostGroup + 
-#                  numHostCitations),
-#   iter = 4000, warmup = 2000, chains = 4, cores = 4,
-#   control = list(adapt_delta = .8, max_treedepth = 10)) 
-
-# (Ellen comment--I think it should be this...in the best mod4, the fit was much better with LOG-TRANSFORMED citations, and interaction with combIUCN. This ran quickly, including getting the kfold & loo-ic's. 
 simpleBrm <- brm(
   data = simpleDat, 
   family = poisson,
