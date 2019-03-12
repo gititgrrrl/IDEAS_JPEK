@@ -1,0 +1,42 @@
+---
+title: "Model diagnostics"
+output: pdf_document
+---
+
+```{r}
+
+
+
+
+
+```
+
+# RICHNESS 
+
+
+``` {r}
+
+
+```
+
+
+```{r}
+
+```
+
+
+# PROP CLOSE
+
+
+```{r}
+
+```
+
+
+# PROP MICRO
+
+
+```{r}
+
+```
+
