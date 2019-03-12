@@ -8,8 +8,6 @@ library(broom)
 library(tidybayes)
 library(purrr)
 
-# Load models 
-
 # Richness
 simpleBrm <- readRDS("./Data/JPEK/simple/simple_brm_all.RDS") 
 simpleBrm_fulldat <- readRDS("./Data/JPEK/simple/simple_brm_all_fulldat.RDS") 
@@ -28,6 +26,8 @@ fullBrm_parastype <- readRDS("./Data/JPEK/full/full_brm_parastype.RDS")
 ########### RICHNESS #############
 
 ### --- fit of simple model of richness --- ###
+
+summary(simpleBrm)
 
 ### --- fit of full model of richness --- ###
 
