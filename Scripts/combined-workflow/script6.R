@@ -193,8 +193,8 @@ plot(simpleBrm_parastrans_fulldat)
 pp_check(simpleBrm_parastrans_fulldat, nsamples = 500)
 
 # add information criteria
-simpleBrm_parastrans_fulldat <- add_ic(simpleBrm_parastrans_fulldat, ic = "loo", reloo = TRUE)
-simpleBrm_parastrans_fulldat <- add_ic(simpleBrm_parastrans_fulldat, ic = "kfold")
+# simpleBrm_parastrans_fulldat <- add_ic(simpleBrm_parastrans_fulldat, ic = "loo", reloo = TRUE)
+# simpleBrm_parastrans_fulldat <- add_ic(simpleBrm_parastrans_fulldat, ic = "kfold")
 
 # model fits and predictions
 simpleMu_parastrans_fulldat <- fitted(simpleBrm_parastrans_fulldat)
@@ -282,8 +282,8 @@ plot(simpleBrm_parastype_fulldat)
 pp_check(simpleBrm_parastype_fulldat, nsamples = 500)
 
 # add information criteria
-simpleBrm_parastype_fulldat <- add_ic(simpleBrm_parastype_fulldat, ic = "loo", reloo = TRUE)
-simpleBrm_parastype_fulldat <- add_ic(simpleBrm_parastype_fulldat, ic = "kfold")
+# simpleBrm_parastype_fulldat <- add_ic(simpleBrm_parastype_fulldat, ic = "loo", reloo = TRUE)
+# simpleBrm_parastype_fulldat <- add_ic(simpleBrm_parastype_fulldat, ic = "kfold")
 
 # model fits and predictions
 simpleMu_parastype_fulldat <- fitted(simpleBrm_parastype_fulldat)
