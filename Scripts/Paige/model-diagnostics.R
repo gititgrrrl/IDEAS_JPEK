@@ -60,33 +60,32 @@ simpleBrm_parastype <- readRDS("./Data/JPEK/simple/simple_brm_parastype.RDS")
 simpleBrm_parastype_fulldat <- readRDS("./Data/JPEK/simple/simple_brm_parastype_fulldat.RDS") 
 fullBrm_parastype <- readRDS("./Data/JPEK/full/full_brm_parastype.RDS") 
 
-
 ### --- summary and fit simple model of richness --- ###
 summary(simpleBrm)
 
 for(g in c("carnivores", "ungulates", "primates")) {
-  pdf(paste0("./Results/richness_dens_plot_simple_", g, ".pdf")) 
+  pdf(paste0("./Results/model-diagnostics/richness_dens_plot_simple_", g, ".pdf")) 
   plot(pp_check(simpleBrm, type = "dens_overlay", nsamples = 300, 
                 newdata = subset(simpleDat, hostGroup == g)) +
          ggtitle(paste0(g, " density plot")) +
          theme(plot.title = element_text(size = 12, face = "bold")))
   dev.off()
 }
-pdf("./Results/richness_dens_plot_simple.pdf") 
+pdf("./Results/model-diagnostics/richness_dens_plot_simple.pdf") 
 pp_check(simpleBrm, type = "violin_grouped", nsamples = 300, group = "combIUCN")
 dev.off()
 
 ### --- summary and fit of simple model of richness (on full dataset) --- ###
 summary(simpleBrm_fulldat)
 for(g in c("carnivores", "ungulates", "primates")) {
-  pdf(paste0("./Results/richness_dens_plot_simple_fulldat_", g, ".pdf")) 
+  pdf(paste0("./Results/model-diagnostics/richness_dens_plot_simple_fulldat_", g, ".pdf")) 
   plot(pp_check(simpleBrm_fulldat, type = "dens_overlay", nsamples = 300, 
                 newdata = subset(fullDat, hostGroup == g)) +
          ggtitle(paste0(g, " density plot")) +
          theme(plot.title = element_text(size = 12, face = "bold")))
   dev.off()
 }
-pdf("./Results/richness_dens_plot_simple_fulldat_iucn.pdf")
+pdf("./Results/model-diagnostics/richness_dens_plot_simple_fulldat_iucn.pdf")
 pp_check(simpleBrm_fulldat, type = "violin_grouped", nsamples = 300, group = "combIUCN")
 dev.off()
 
@@ -94,19 +93,14 @@ dev.off()
 ### --- summary and fit of full model of richness --- ###
 summary(fullBrm)
 for(g in c("carnivores", "ungulates", "primates")) {
-  pdf(paste0("./Results/richness_dens_plot_full_", g, ".pdf")) 
+  pdf(paste0("./Results/model-diagnostics/richness_dens_plot_full_", g, ".pdf")) 
   plot(pp_check(fullBrm, type = "dens_overlay", nsamples = 300, 
                 newdata = subset(fullDat, hostGroup == g)) +
          ggtitle(paste0(g, " density plot")) +
          theme(plot.title = element_text(size = 12, face = "bold")))
   dev.off()
 }
-pdf("./Results/richness_dens_plot_full_iucn.pdf")
+pdf("./Results/model-diagnostics/richness_dens_plot_full_iucn.pdf")
 pp_check(fullBrm, type = "violin_grouped", nsamples = 300, group = "combIUCN")
 dev.off()
 
-### --- marginal effects simple model of richness --- ###
-
-### --- marginal effects simple model of richness (full dataset) --- ###
-
-### --- marginal effects full model of richness --- ###
