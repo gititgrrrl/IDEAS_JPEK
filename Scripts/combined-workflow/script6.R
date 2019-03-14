@@ -72,8 +72,8 @@ plot(fullBrm)
 pp_check(fullBrm, nsamples = 500)
 
 # add information criteria
-# fullBrm <- add_ic(fullBrm, ic = "loo", reloo = TRUE)  
-# fullBrm <- add_ic(fullBrm, ic = "kfold")
+fullBrm <- add_ic(fullBrm, ic = "loo", reloo = TRUE)
+fullBrm <- add_ic(fullBrm, ic = "kfold")
 
 # model fits and predictions
 fullMu <- fitted(fullBrm)
@@ -105,8 +105,8 @@ plot(simpleBrm_fulldat)
 pp_check(simpleBrm_fulldat, nsamples = 500)
 
 # add information criteria
-# simpleBrm_fulldat <- add_ic(simpleBrm_fulldat, ic = "loo", reloo = TRUE)
-# simpleBrm_fulldat <- add_ic(simpleBrm_fulldat, ic = "kfold")
+simpleBrm_fulldat <- add_ic(simpleBrm_fulldat, ic = "loo", reloo = TRUE)
+simpleBrm_fulldat <- add_ic(simpleBrm_fulldat, ic = "kfold")
 
 # model fits and predictions
 simpleMu_fulldat <- fitted(simpleBrm_fulldat)
