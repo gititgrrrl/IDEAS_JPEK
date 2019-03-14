@@ -63,7 +63,7 @@ simpleMu_fulldat <- readRDS("./Data/JPEK/simple/simple_brm_all_mu_fulldat.RDS")
 fullMu <- readRDS("./Data/JPEK/full/full_brm_all_mu.RDS")
 
 ### -- MODEL SUMMARIES --- ###
-# EXAMINE COEFFICIENTS ----
+# Examine coefficients ----
 # NOTES:
 # > For total richness response, model coefficients should be exponentiated to get the estimated richness
 # > For parasite transmission and type responses, model coefficients are log-odds. Exponentiate the coefficient to get odds. To get probability, use the equation: exp(coef) / (1 + exp(coef)). The function 'plogis' calculates the latter, so you just use plogis(coef)
@@ -80,7 +80,7 @@ fixef(full_mod)
 fixef(simple_mod_parastrans_fulldat)
 fixef(full_mod_parastrans) # <<<<<<<<<<<<<<<<<<< ELLEN, PICK UP FROM HERE--WHAT IS MARGINAL EFFECTS ACTUALLY CALCULATING? COULD BE THE EXPECTED NUMBER OF CLOSE PARASITES GIVEN AVERAGE LOG CITATIONS, BUT THEN IT'S A BIT TOO LOW
 
-# EXAMINE COEFFICIENT PLOTS ----
+# Generate coefficient plots ----
 # NOTE: Only look at coefficients that both simple and full models estimate.
 # UPSHOT: For all three response variables, the full vs. simple (using same data) coefficients are pretty different, especially for primates. But the confidence intervals for full model coefficients are quite large, so often still overlap the simple model coefficients.
 FuncPlotCoef <- function(mod_list, terms_vec = NULL, exclude_terms = FALSE) {
@@ -123,12 +123,3 @@ FuncPlotCoef(mod_list = list(simple_parastrans_fulldat = simple_mod_parastrans_f
 
 # Response = % micro parasite
 FuncPlotCoef(mod_list = list(simple_parastype_fulldat = simple_mod_parastype_fulldat, full_parastype = full_mod_parastype), terms_vec = c("Intercept", "combIUCNthreatened", "hostGroupprimates", "hostGroupungulates", "logNumHostCitations", "combIUCNthreatened:hostGroupprimates", "combIUCNthreatened:hostGroupungulates", "combIUCNthreatened:logNumHostCitations"))
-
-### -- MODEL PREDICTIONS --- ###
-
-simplePred <- readRDS("./Data/JPEK/simple/simple_brm_all_predict.RDS")
-simplePred_fulldat <- readRDS("./Data/JPEK/simple/simple_brm_all_predict_fulldat.RDS")
-fullPred <- readRDS("./Data/JPEK/full/full_brm_all_predict.RDS")
-
-### --- MODEL OBSERVATIONS PREDICTIONS --- ###
-
