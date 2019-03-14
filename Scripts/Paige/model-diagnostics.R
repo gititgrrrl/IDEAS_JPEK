@@ -104,3 +104,4 @@ pdf("./Results/model-diagnostics/richness_dens_plot_full_iucn.pdf")
 pp_check(fullBrm, type = "violin_grouped", nsamples = 300, group = "combIUCN")
 dev.off()
 
+### RESIDUAL PLOTS ----
