@@ -159,9 +159,9 @@ saveRDS(fullBrm_unggroup_parastrans, "./Data/JPEK/full/full_brm_unggroup_parastr
 # saveRDS(fullPredict_unggroup_parastrans, "./Data/JPEK/full/full_brm_unggroup_parastrans_predict.RDS")
 # saveRDS(fullResid_unggroup_parastrans, "./Data/JPEK/full/full_brm_unggroup_parastrans_resid.RDS")
 # 
-# # marginal effects
-# fullMarg_unggroup_parastrans <- plot(marginal_effects(fullBrm_unggroup_parastrans), method = "fitted", plot = FALSE)
-# saveRDS(fullMarg_unggroup_parastrans, "./Data/JPEK/full/full_brm_unggroup_parastrans_me.RDS")
+# marginal effects
+fullMarg_unggroup_parastrans <- plot(marginal_effects(fullBrm_unggroup_parastrans), method = "fitted", plot = FALSE)
+saveRDS(fullMarg_unggroup_parastrans, "./Data/JPEK/full/full_brm_unggroup_parastrans_me.RDS")
 
 ### PRIMATES WITH PARASITE TRANSMISSION AS RESPONSE ----
 # Create data

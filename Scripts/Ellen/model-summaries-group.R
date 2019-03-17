@@ -99,6 +99,7 @@ marginal_rich_simple_prim <- readRDS("./Data/JPEK/simple/simp_brm_primgroup_me.R
 marginal_parastrans_allInt_prim <- readRDS("./Data/JPEK/allInt/allInt_brm_primgroup_parastrans_me.RDS")
 # ...full
 marginal_parastrans_full_carn <- readRDS("./Data/JPEK/full/full_brm_carngroup_parastrans_me.RDS")
+marginal_parastrans_full_ung <- readRDS("./Data/JPEK/full/full_brm_unggroup_parastrans_me.RDS")
 # ...simple
 marginal_parastrans_simple_carn <- readRDS("./Data/JPEK/simple/simp_brm_carngroup_parastrans_me.RDS")
 marginal_parastrans_simple_ung <- readRDS("./Data/JPEK/simple/simp_brm_unggroup_parastrans_me.RDS")
@@ -216,13 +217,13 @@ FuncPlotCoef(mod_list = list(simple_parastrans_fulldat = simple_mod_parastrans_f
 FuncPlotCoef(mod_list = list(simple_parastype_fulldat = simple_mod_parastype_fulldat, full_parastype = full_mod_parastype), terms_vec = c("Intercept", "combIUCNthreatened", "hostGroupprimates", "hostGroupungulates", "logNumHostCitations", "combIUCNthreatened:hostGroupprimates", "combIUCNthreatened:hostGroupungulates", "combIUCNthreatened:logNumHostCitations"))
 
 ### MARGINAL EFFECTS ----
-marg_list <- marginal_parastype_full_ung # <<<<<<< USER SET
+marg_list <- marginal_parastrans_full_ung # <<<<<<< USER SET
 group_nam <- "ung" # <<<<<<< USER SET
 
 for(i in 1:length(marg_list)) {
-pdf(paste0("./Results/model-summaries-group/marginal_parastype_full/marginal_parastype_full_", group_nam, "_", names(marg_list)[i], ".pdf")) # <<<<<<< USER SET
+pdf(paste0("./Results/model-summaries-group/marginal_parastrans_full/marginal_parastrans_full_", group_nam, "_", names(marg_list)[i], ".pdf")) # <<<<<<< USER SET
 plot(marg_list[[i]] +
-  labs(y = "Parasite type") +
+  labs(y = "Parasite transmission") +
   scale_color_brewer(palette = "Dark2") +
   scale_fill_brewer(palette = "Dark2") +
   theme_bw(base_size = 10))
