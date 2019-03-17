@@ -5,7 +5,7 @@
 # rm(list=ls())
 # 
 # ### LOAD PACKAGES ----
-# packages <- c("magrittr", "cowplot", "GGally", "scales", "tidyverse", "rstan", 
+# packages <- c("magrittr", "cowplot", "GGally", "scales", "tidyverse", "rstan",
 #               "brms", "broom", "tidybayes", "purrr", "glmmTMB")
 # package.check <- lapply(packages, FUN = function(x) {
 #   if (!require(x, character.only = TRUE)) {
@@ -43,7 +43,7 @@ library(glmmTMB)
 #   mutate(logNumHostCitations_c = logNumHostCitations - mean(logNumHostCitations, na.rm = TRUE),
 #          logHostSpeciesRange_c = logHostSpeciesRange - mean(logHostSpeciesRange, na.rm = TRUE),
 #          logHostMass_c = logHostMass - mean(logHostMass, na.rm = TRUE),
-#          hostMaxLifespan_c = hostMaxLifespan - mean(hostMaxLifespan, na.rm = TRUE), 
+#          hostMaxLifespan_c = hostMaxLifespan - mean(hostMaxLifespan, na.rm = TRUE),
 #          absHostMeanLat_c = absHostMeanLat - mean(absHostMeanLat, na.rm = TRUE))
 # 
 # allIntBrm_carngroup_c <- brm(
@@ -189,4 +189,4 @@ saveRDS(simp_primgroup_c_me, "./Data/JPEK/simple/simp_brm_primgroup_c_me.RDS")
 # marginal effects
 simpBrm_unggroup_c <- readRDS("./Data/JPEK/simple/simp_brm_unggroup_c_all.RDS")
 simp_unggroup_c_me <- plot(marginal_effects(simpBrm_unggroup_c), method = "fitted", plot = FALSE)
-saveRDS(simp_unggroup_me, "./Data/JPEK/simple/simp_brm_unggroup_me.RDS")
+saveRDS(simp_unggroup_c_me, "./Data/JPEK/simple/simp_brm_unggroup_c_me.RDS")
