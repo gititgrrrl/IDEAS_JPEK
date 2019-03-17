@@ -20,56 +20,102 @@ package.check <- lapply(packages, FUN = function(x) {
 rstan_options (auto_write=TRUE)
 options (mc.cores=parallel::detectCores ()) # Run chains on multiple cores# Model diagnostics
 
-### --- DATA ----
-allDat <- read_csv("./Data/JPEK/script4.csv") # columns 28 & 29 = # host and parasite citations 
+### READ IN DATA FOR PARASITE RICHNESS ----
+allDat <- read_csv("Data/JPEK/script4.csv")
+# ...carnivores
+dat_rich_carn <- allDat %>%
+  filter(hostGroup == "carnivores") %>%
+  select(hostName, groupSizeCar, parRich, logNumHostCitations, combIUCN, logHostSpeciesRange, logHostMass, hostMaxLifespan, absHostMeanLat) %>%
+  distinct() # 148 records
+dat_rich_carn <- dat_rich_carn[complete.cases(dat_rich_carn),] # only 74 records
+# ...ungulates
+dat_rich_ung <- allDat %>%
+  filter(hostGroup == "ungulates") %>%
+  select(hostName, groupSizePriUng, parRich, logNumHostCitations, combIUCN, logHostSpeciesRange, logHostMass, hostMaxLifespan, absHostMeanLat) %>%
+  mutate(logGroupSizePriUng = log(groupSizePriUng)) %>%
+  distinct() # 102 records
+dat_rich_ung <- dat_rich_ung[complete.cases(dat_rich_ung),] # only 60 records
+# ...primates
+dat_rich_prim <- allDat %>%
+  filter(hostGroup == "primates") %>%
+  select(hostName, groupSizePriUng, parRich, logNumHostCitations, combIUCN, logHostSpeciesRange, logHostMass, hostMaxLifespan, absHostMeanLat) %>%
+  mutate(logGroupSizePriUng = log(groupSizePriUng)) %>%
+  distinct() # 142 records
+dat_rich_prim <- dat_rich_prim[complete.cases(dat_rich_prim),] # only 73 records
 
-# # SIMPLE RICHNESS
-# simpleDat <- allDat %>%
-#   select(hostName, parRich, logNumHostCitations, combIUCN, hostGroup) %>% # <<<<< (Ellen) grab the logNumHostCitations (not numHostCitations)
-#   distinct()
-# simpleDat <- simpleDat[complete.cases(simpleDat),]              # 362 hosts
-
-
-# FULL RICHNESS
-fullDat <- allDat %>%
-  select(hostName, parRich, logNumHostCitations, combIUCN, 
-         hostGroup, logHostSpeciesRange, logHostMass, hostMaxLifespan, absHostMeanLat) %>%
-  distinct() # 392 records
-fullDat <- fullDat[complete.cases(fullDat),] # only 232 records (before, it was 255 records--not sure why it's fewer now <<<<< ?????)
-
-# FULL PARAS TRANS
-fullDat_parastrans <- allDat %>%
-  select(hostName, parRichCloseOnly, parRichTransKnown, logNumHostCitations, combIUCN, hostGroup, logHostSpeciesRange, logHostMass, hostMaxLifespan, absHostMeanLat) %>%
+### READ IN DATA FOR PARASITE TRANSMISSION ----
+allDat <- read_csv("Data/JPEK/script4.csv")
+# ...carnivores
+dat_parastrans_carn <- allDat %>%
+  filter(hostGroup == "carnivores") %>%
+  select(hostName, parRichCloseOnly, parRichTransKnown, groupSizeCar, logNumHostCitations, combIUCN, logHostSpeciesRange, logHostMass, hostMaxLifespan, absHostMeanLat) %>%
   distinct() %>%
-  filter(parRichTransKnown > 0) # 362
+  filter(parRichTransKnown > 0) # 139
 
-fullDat_parastrans <- fullDat_parastrans[complete.cases(fullDat_parastrans),]   # 220
+dat_parastrans_carn <- dat_parastrans_carn[complete.cases(dat_parastrans_carn),]
 
-# FULL PARA TYPE
-fullDat_parastype <- allDat %>%
-  select(hostName, logNumHostCitations, combIUCN, hostGroup, bacteriaRich, virusRich, protozoaRich, fungusRich, prionRich, helminthRich, arthropodRich, logHostSpeciesRange, logHostMass, hostMaxLifespan, absHostMeanLat) %>%
+# ...ungulates
+dat_parastrans_ung <- allDat %>%
+  filter(hostGroup == "ungulates") %>%
+  select(hostName, parRichCloseOnly, parRichTransKnown, groupSizePriUng, logNumHostCitations, combIUCN, logHostSpeciesRange, logHostMass, hostMaxLifespan, absHostMeanLat) %>%
+  mutate(logGroupSizePriUng = log(groupSizePriUng)) %>%
   distinct() %>%
-  mutate(parRich_micro=(bacteriaRich + virusRich + protozoaRich + fungusRich + prionRich),
-         parRich_alltypes =(parRich_micro + helminthRich + arthropodRich)) # 393
+  filter(parRichTransKnown > 0) # 139
 
-fullDat_parastype <- fullDat_parastype[complete.cases(fullDat_parastype),] # 232
+dat_parastrans_ung <- dat_parastrans_ung[complete.cases(dat_parastrans_ung),] # only 60 records
 
-### --- MODELS ----
+# ...primates
+dat_parastrans_prim <- allDat %>%
+  filter(hostGroup == "primates") %>%
+  select(hostName, parRichCloseOnly, parRichTransKnown, groupSizePriUng, logNumHostCitations, combIUCN, logHostSpeciesRange, logHostMass, hostMaxLifespan, absHostMeanLat) %>%
+  mutate(logGroupSizePriUng = log(groupSizePriUng)) %>%
+  distinct() %>%
+  filter(parRichTransKnown > 0) # 139
 
-# RICHNESS
-# simpleBrm <- readRDS("./Data/JPEK/simple/simple_brm_all.RDS") 
-simpleBrm_fulldat <- readRDS("./Data/JPEK/simple/simple_brm_all_fulldat.RDS") 
-fullBrm <- readRDS("./Data/JPEK/full/full_brm_all.RDS") 
+dat_parastrans_prim <- dat_parastrans_prim[complete.cases(dat_parastrans_prim),]
 
-# PARAS TRANS
-# simpleBrm_parastrans <- readRDS("./Data/JPEK/simple/simple_brm_parastrans.RDS") 
-simpleBrm_parastrans_fulldat <- readRDS("./Data/JPEK/simple/simple_brm_parastrans_fulldat.RDS") 
-fullBrm_parastrans <- readRDS("./Data/JPEK/full/full_brm_parastrans.RDS") 
+### READ IN MODELS ----
+# Parasite richness
+# ...allInt
+mod_rich_allInt_carn <- readRDS("./Data/JPEK/allInt/allInt_brm_carngroup_all.RDS")
+mod_rich_allInt_ung <- readRDS("./Data/JPEK/allInt/allInt_brm_unggroup_all.RDS")
+mod_rich_allInt_prim <- readRDS("./Data/JPEK/allInt/allInt_brm_primgroup_all.RDS") 
+# ...full
+mod_rich_full_carn <- readRDS("./Data/JPEK/full/full_brm_carngroup_all.RDS")
+mod_rich_full_ung <- readRDS("./Data/JPEK/full/full_brm_unggroup_all.RDS")
+mod_rich_full_prim <- readRDS("./Data/JPEK/full/full_brm_primgroup_all.RDS") 
+# ...simple
+mod_rich_simple_carn <- readRDS("./Data/JPEK/simple/simp_brm_carngroup_all.RDS")
+mod_rich_simple_ung <- readRDS("./Data/JPEK/simple/simp_brm_unggroup_all.RDS") 
+mod_rich_simple_prim <- readRDS("./Data/JPEK/simple/simp_brm_primgroup_all.RDS")
 
-# PARAS TYPE
-# simpleBrm_parastype <- readRDS("./Data/JPEK/simple/simple_brm_parastype.RDS") 
-simpleBrm_parastype_fulldat <- readRDS("./Data/JPEK/simple/simple_brm_parastype_fulldat.RDS") 
-fullBrm_parastype <- readRDS("./Data/JPEK/full/full_brm_parastype.RDS") 
+# Parasite transmission
+# ...allInt
+mod_parastrans_allInt_carn <- readRDS("./Data/JPEK/allInt/allInt_brm_carngroup_parastrans.RDS")
+mod_parastrans_allInt_ung <- readRDS("./Data/JPEK/allInt/allInt_brm_unggroup_parastrans.RDS")
+mod_parastrans_allInt_prim <- readRDS("./Data/JPEK/allInt/allInt_brm_primgroup_parastrans.RDS")
+# ...full
+mod_parastrans_full_carn <- readRDS("./Data/JPEK/full/full_brm_carngroup_parastrans.RDS")
+mod_parastrans_full_ung <- readRDS("./Data/JPEK/full/full_brm_unggroup_parastrans.RDS")
+mod_parastrans_full_prim <- readRDS("./Data/JPEK/full/full_brm_primgroup_parastrans.RDS")
+# ...simple
+mod_parastrans_simple_carn <- readRDS("./Data/JPEK/simple/simp_brm_carngroup_parastrans.RDS")
+mod_parastrans_simple_ung <- readRDS("./Data/JPEK/simple/simp_brm_unggroup_parastrans.RDS")
+mod_parastrans_simple_prim <- readRDS("./Data/JPEK/simple/simp_brm_primgroup_parastrans.RDS")
+
+# Parasite type
+# ...allInt
+mod_parastype_allInt_carn <- readRDS("./Data/JPEK/allInt/allInt_brm_carngroup_parastype.RDS")
+mod_parastype_allInt_ung <- readRDS("./Data/JPEK/allInt/allInt_brm_unggroup_parastype.RDS")
+mod_parastype_allInt_prim <- readRDS("./Data/JPEK/allInt/allInt_brm_primgroup_parastype.RDS")
+# ...full
+mod_parastype_full_carn <- readRDS("./Data/JPEK/full/full_brm_carngroup_parastype.RDS")
+mod_parastype_full_ung <- readRDS("./Data/JPEK/full/full_brm_unggroup_parastype.RDS")
+mod_parastype_full_prim <- readRDS("./Data/JPEK/full/full_brm_primgroup_parastype.RDS")
+# ...simple
+mod_parastype_simple_carn <- readRDS("./Data/JPEK/simple/simp_brm_carngroup_parastype.RDS")
+mod_parastype_simple_ung <- readRDS("./Data/JPEK/simple/simp_brm_unggroup_parastype.RDS")
+mod_parastype_simple_prim <- readRDS("./Data/JPEK/simple/simp_brm_primgroup_parastype.RDS")
 
 ### --- PP_CHECKS ----
 # # SIMPLE RICHNESS
@@ -362,37 +408,103 @@ FuncK <- function(mod_list, x_wts) {
   return(Kfold_summary)
 }
 
-# RICHNESS, SIMPLE (ON FULL DATA) COMPARED TO FULL ----
-# Full model won hands-down!
-#                     model  kfoldic se(kfoldic) weight
-#             Full richness 1779.850      88.463      1
-# Simple (fulldat) richness 1902.586      89.972      0
+# RESPONSE IS PARASITE RICHNESS ----
+# RESULTS ----
+# ...carnivores, ALLINT IS BARELY BETTER
+# model             kfoldic   se(kfoldic) weight
+# rich_allInt_carn  590.107   47.866      0.688
+# rich_full_carn    591.688   46.474      0.312
+# rich_simple_carn  639.944   54.542      0.000
+# ...ungulates, FULL WINS BUT SE IS LARGE. COULD NOT CALCULATE K-FOLD FOR 'allInt', but LOO-IC showed that model to be worse than 'full' or 'simple'
+# model             kfoldic   se(kfoldic) weight
+# rich_full_ung     616.040   77.176      1
+# rich_simple_ung   640.017   45.459      0
+# ...primates, SIMPLE & FULL PRETTY MUCH HAVE SAME KFOLD-IC (FULL IS BARELY BETTER)
+# model             kfoldic   se(kfoldic) weight
+# rich_full_prim    456.150   49.169      0.659
+# rich_simple_prim  457.470   52.208      0.341
+# rich_allInt_prim  494.726   56.304      0.000
 
-mod_list = list(`Simple (fulldat) richness` = simpleBrm_fulldat, `Full richness` = fullBrm)
-x_wts <- model_weights(simpleBrm_fulldat, fullBrm, weights = "kfold")
-names(x_wts) = c("Simple (fulldat) richness", "Full richness")
-
+# ...carnivores
+mod_list = list(rich_simple_carn = mod_rich_simple_carn, rich_full_carn = mod_rich_full_carn, rich_allInt_carn = mod_rich_allInt_carn)
+x_wts <- model_weights(mod_rich_simple_carn, mod_rich_full_carn, mod_rich_allInt_carn, weights = "kfold")
+names(x_wts) = c("rich_simple_carn", "rich_full_carn", "rich_allInt_carn")
+(FuncK(mod_list = mod_list, x_wts = x_wts))
+# ...ungulates (CAN'T CALCULATE K-FOLD FOR ALL-INT, FOR SOME REASON)
+mod_list = list(rich_simple_ung = mod_rich_simple_ung, rich_full_ung = mod_rich_full_ung, rich_allInt_ung = mod_rich_allInt_ung)
+x_wts <- model_weights(mod_rich_simple_ung, mod_rich_full_ung, mod_rich_allInt_ung, weights = "kfold")
+names(x_wts) = c("rich_simple_ung", "rich_full_ung", "rich_allInt_ung")
+(FuncK(mod_list = mod_list, x_wts = x_wts))
+# ...primates
+mod_list = list(rich_simple_prim = mod_rich_simple_prim, rich_full_prim = mod_rich_full_prim, rich_allInt_prim = mod_rich_allInt_prim)
+x_wts <- model_weights(mod_rich_simple_prim, mod_rich_full_prim, mod_rich_allInt_prim, weights = "kfold")
+names(x_wts) = c("rich_simple_prim", "rich_full_prim", "rich_allInt_prim")
 (FuncK(mod_list = mod_list, x_wts = x_wts))
 
-# PARASITE TRANSMISSION, SIMPLE (ON FULL DATA) COMPARED TO FULL ----
-mod_list = list(`Simple (fulldat) paras trans` = simpleBrm_parastrans_fulldat, `Full paras trans` = fullBrm_parastrans)
-x_wts <- model_weights(simpleBrm_parastrans_fulldat, fullBrm_parastrans, weights = "kfold")
-names(x_wts) = c("Simple (fulldat) paras trans", "Full paras trans")
+# RESPONSE IS PARASITE TRANSMISSION ----
+# RESULTS ----
+# ...carnivores, FULL IS BARELY BETTER THAN SIMPLE
+# model                   kfoldic   se(kfoldic) weight
+# parastrans_full_carn    229.037   20.206      0.567
+# parastrans_simple_carn  229.573   16.732      0.433
+# parastrans_allInt_carn  249.698   23.663      0.000
+# ...ungulates, SIMPLE IS BEST
+# model                   kfoldic   se(kfoldic) weight
+# parastrans_simple_ung   221.451   24.689      1
+# parastrans_full_ung     237.718   24.746      0
+# parastrans_allInt_ung   273.955   35.313      0
+# ...primates, ALLINT IS A BIT BETTER THAN SIMPLE
+# model                   kfoldic   se(kfoldic) weight
+# parastrans_allInt_prim  167.325   22.707      0.703
+# parastrans_simple_prim  169.048   26.259      0.297
+# parastrans_full_prim    188.964    29.199     0.000
 
+# ...carnivores
+mod_list = list(parastrans_simple_carn = mod_parastrans_simple_carn, parastrans_full_carn = mod_parastrans_full_carn, parastrans_allInt_carn = mod_parastrans_allInt_carn)
+x_wts <- model_weights(mod_parastrans_simple_carn, mod_parastrans_full_carn, mod_parastrans_allInt_carn, weights = "kfold")
+names(x_wts) = c("parastrans_simple_carn", "parastrans_full_carn", "parastrans_allInt_carn")
+(FuncK(mod_list = mod_list, x_wts = x_wts))
+# ...ungulates
+mod_list = list(parastrans_simple_ung = mod_parastrans_simple_ung, parastrans_full_ung = mod_parastrans_full_ung, parastrans_allInt_ung = mod_parastrans_allInt_ung)
+x_wts <- model_weights(mod_parastrans_simple_ung, mod_parastrans_full_ung, mod_parastrans_allInt_ung, weights = "kfold")
+names(x_wts) = c("parastrans_simple_ung", "parastrans_full_ung", "parastrans_allInt_ung")
+(FuncK(mod_list = mod_list, x_wts = x_wts))
+# ...primates
+mod_list = list(parastrans_simple_prim = mod_parastrans_simple_prim, parastrans_full_prim = mod_parastrans_full_prim, parastrans_allInt_prim = mod_parastrans_allInt_prim)
+x_wts <- model_weights(mod_parastrans_simple_prim, mod_parastrans_full_prim, mod_parastrans_allInt_prim, weights = "kfold")
+names(x_wts) = c("parastrans_simple_prim", "parastrans_full_prim", "parastrans_allInt_prim")
 (FuncK(mod_list = mod_list, x_wts = x_wts))
 
-# # PARASITE TRANSMISSION, SIMPLE (ON FULL DATA) COMPARED TO FULL ----
-# # >>>>>> WAITING FOR IC'S TO BE RUN ON THESE <<<<<
-# mod_list = list(`Simple (fulldat) paras trans` = simpleBrm_parastrans_fulldat, `Full paras trans` = fullBrm_parastrans)
-# x_wts <- model_weights(simpleBrm_parastrans_fulldat, fullBrm_parastrans, weights = "kfold")
-# names(x_wts) = c("Simple (fulldat) paras trans", "Full paras trans")
-# 
-# (FuncK(mod_list = mod_list, x_wts = x_wts))
-# 
-# # PARASITE TYPE, SIMPLE (ON FULL DATA) COMPARED TO FULL ----
-# # >>>>>> WAITING FOR IC'S TO BE RUN ON THESE <<<<<
-# mod_list = list(`Simple (fulldat) paras type` = simpleBrm_parastype_fulldat, `Full paras type` = fullBrm_parastype)
-# x_wts <- model_weights(simpleBrm_parastype_fulldat, fullBrm_parastype, weights = "kfold")
-# names(x_wts) = c("Simple (fulldat) paras type", "Full paras type")
-# 
-# (FuncK(mod_list = mod_list, x_wts = x_wts))
+# RESPONSE IS PARASITE TYPE ----
+# RESULTS ----
+# ...carnivores, 'ALLINT' IS BEST BY FAR
+#                   model kfoldic se(kfoldic) weight
+# parastype_allInt_carn 397.796      37.077      1
+# parastype_full_carn 431.285      47.007      0
+# parastype_simple_carn 443.640      68.331      0
+# ...ungulates, 'FULL' IS BEST BY FAR
+# model kfoldic se(kfoldic) weight
+# parastype_full_ung 555.892      83.852      1
+# parastype_simple_ung 625.129      94.893      0
+# parastype_allInt_ung 794.577     150.260      0
+# ...primates, 'SIMPLE' IS BEST--ALL ARE SIMILAR
+# model kfoldic se(kfoldic) weight
+# parastype_simple_prim 341.349      33.540  0.999
+# parastype_allInt_prim 355.293      33.426  0.001
+# parastype_full_prim 364.141      34.204  0.000
+#
+# ...carnivores
+mod_list = list(parastype_simple_carn = mod_parastype_simple_carn, parastype_full_carn = mod_parastype_full_carn, parastype_allInt_carn = mod_parastype_allInt_carn)
+x_wts <- model_weights(mod_parastype_simple_carn, mod_parastype_full_carn, mod_parastype_allInt_carn, weights = "kfold")
+names(x_wts) = c("parastype_simple_carn", "parastype_full_carn", "parastype_allInt_carn")
+(FuncK(mod_list = mod_list, x_wts = x_wts))
+# ...ungulates
+mod_list = list(parastype_simple_ung = mod_parastype_simple_ung, parastype_full_ung = mod_parastype_full_ung, parastype_allInt_ung = mod_parastype_allInt_ung)
+x_wts <- model_weights(mod_parastype_simple_ung, mod_parastype_full_ung, mod_parastype_allInt_ung, weights = "kfold")
+names(x_wts) = c("parastype_simple_ung", "parastype_full_ung", "parastype_allInt_ung")
+(FuncK(mod_list = mod_list, x_wts = x_wts))
+# ...primates
+mod_list = list(parastype_simple_prim = mod_parastype_simple_prim, parastype_full_prim = mod_parastype_full_prim, parastype_allInt_prim = mod_parastype_allInt_prim)
+x_wts <- model_weights(mod_parastype_simple_prim, mod_parastype_full_prim, mod_parastype_allInt_prim, weights = "kfold")
+names(x_wts) = c("parastype_simple_prim", "parastype_full_prim", "parastype_allInt_prim")
+(FuncK(mod_list = mod_list, x_wts = x_wts))

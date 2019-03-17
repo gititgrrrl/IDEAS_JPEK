@@ -190,29 +190,29 @@ options (mc.cores=parallel::detectCores ()) # Run chains on multiple cores
 # 
 # # ...model with ALL threat interactions
 # > ONLY GOING AS FAR AS IC CALCS ON THESE--IF THEY ARE BETTER MODELS, THEN FOR FINAL PAPER NEED TO GET MARGINAL EFFECTS, ETC.
-allIntBrm_primgroup <- brm(
-  data = fullDat_primgroup,
-  family = poisson,
-  formula = bf(parRich | trunc(lb = 1) ~
-                 combIUCN*logNumHostCitations +
-                 combIUCN*logHostSpeciesRange +
-                 combIUCN*logGroupSizePriUng +
-                 combIUCN*logHostMass +
-                 combIUCN*hostMaxLifespan +
-                 combIUCN*absHostMeanLat),
-  iter =4000, warmup = 2000, chains = 4, cores = 4,
-  control = list(adapt_delta = .8, max_treedepth = 10))  # may wnat to increase max_tree depth although all converged
-
-# quick checks
-summary(allIntBrm_primgroup)
-plot(allIntBrm_primgroup)
-pp_check(allIntBrm_primgroup, nsamples = 500)
-
-# add information criteria
-allIntBrm_primgroup <- add_ic(allIntBrm_primgroup, ic = "loo", reloo = TRUE)
-allIntBrm_primgroup <- add_ic(allIntBrm_primgroup, ic = "kfold")
-saveRDS(allIntBrm_primgroup, "./Data/JPEK/allInt/allInt_brm_primgroup_all.RDS")
-
+# allIntBrm_primgroup <- brm(
+#   data = fullDat_primgroup,
+#   family = poisson,
+#   formula = bf(parRich | trunc(lb = 1) ~
+#                  combIUCN*logNumHostCitations +
+#                  combIUCN*logHostSpeciesRange +
+#                  combIUCN*logGroupSizePriUng +
+#                  combIUCN*logHostMass +
+#                  combIUCN*hostMaxLifespan +
+#                  combIUCN*absHostMeanLat),
+#   iter =4000, warmup = 2000, chains = 4, cores = 4,
+#   control = list(adapt_delta = .8, max_treedepth = 10))  # may wnat to increase max_tree depth although all converged
+# 
+# # quick checks
+# summary(allIntBrm_primgroup)
+# plot(allIntBrm_primgroup)
+# pp_check(allIntBrm_primgroup, nsamples = 500)
+# 
+# # add information criteria
+# allIntBrm_primgroup <- add_ic(allIntBrm_primgroup, ic = "loo", reloo = TRUE)
+# allIntBrm_primgroup <- add_ic(allIntBrm_primgroup, ic = "kfold")
+# saveRDS(allIntBrm_primgroup, "./Data/JPEK/allInt/allInt_brm_primgroup_all.RDS")
+# 
 # # ...full model (some threat interactions omitted)
 # 
 # fullBrm_primgroup <- brm(

@@ -57,9 +57,9 @@ fitted_rich_full_carn <- readRDS("./Data/JPEK/full/full_brm_carngroup_all_mu.RDS
 fitted_rich_full_ung <- readRDS("./Data/JPEK/full/full_brm_unggroup_all_mu.RDS")
 fitted_rich_full_prim <- readRDS("./Data/JPEK/full/full_brm_primgroup_all_mu.RDS")
 # ...simple
-fitted_simple_full_carn <- readRDS("./Data/JPEK/simple/simp_brm_carngroup_all_mu.RDS") 
-fitted_simple_full_ung <- readRDS("./Data/JPEK/simple/simp_brm_unggroup_all_mu.RDS") 
-fitted_simple_full_prim <- readRDS("./Data/JPEK/simple/simp_brm_primgroup_all_mu.RDS") 
+fitted_rich_simple_carn <- readRDS("./Data/JPEK/simple/simp_brm_carngroup_all_mu.RDS") 
+fitted_rich_simple_ung <- readRDS("./Data/JPEK/simple/simp_brm_unggroup_all_mu.RDS") 
+fitted_rich_simple_prim <- readRDS("./Data/JPEK/simple/simp_brm_primgroup_all_mu.RDS") 
 
 ### READ IN PREDICTED ----
 # Parasite richness
@@ -90,11 +90,30 @@ marginal_rich_full_carn <- readRDS("./Data/JPEK/full/full_brm_carngroup_me.RDS")
 marginal_rich_full_ung <- readRDS("./Data/JPEK/full/full_brm_unggroup_me.RDS")
 marginal_rich_full_prim <- readRDS("./Data/JPEK/full/full_brm_primgroup_me.RDS")
 # ...simple
-marginal_simple_full_carn <- readRDS("./Data/JPEK/simple/simp_brm_carngroup_me.RDS")
-marginal_simple_full_ung <- readRDS("./Data/JPEK/simple/simp_brm_unggroup_me.RDS")
-marginal_simple_full_prim <- readRDS("./Data/JPEK/simple/simp_brm_primgroup_me.RDS")
+marginal_rich_simple_carn <- readRDS("./Data/JPEK/simple/simp_brm_carngroup_me.RDS")
+marginal_rich_simple_ung <- readRDS("./Data/JPEK/simple/simp_brm_unggroup_me.RDS")
+marginal_rich_simple_prim <- readRDS("./Data/JPEK/simple/simp_brm_primgroup_me.RDS")
 
+# Parasite transmission
+# ...allInt
+marginal_parastrans_allInt_prim <- readRDS("./Data/JPEK/allInt/allInt_brm_primgroup_parastrans_me.RDS")
+# ...full
+marginal_parastrans_full_carn <- readRDS("./Data/JPEK/full/full_brm_carngroup_parastrans_me.RDS")
+# ...simple
+marginal_parastrans_simple_carn <- readRDS("./Data/JPEK/simple/simp_brm_carngroup_parastrans_me.RDS")
+marginal_parastrans_simple_ung <- readRDS("./Data/JPEK/simple/simp_brm_unggroup_parastrans_me.RDS")
+marginal_parastrans_simple_prim <- readRDS("./Data/JPEK/simple/simp_brm_primgroup_parastrans_me.RDS")
 
+# Parasite type
+# ...allInt
+marginal_parastype_allInt_carn <- readRDS("./Data/JPEK/allInt/allInt_brm_carngroup_parastype_me.RDS")
+marginal_parastype_allInt_prim <- readRDS("./Data/JPEK/allInt/allInt_brm_primgroup_parastype_me.RDS")
+# ...full
+marginal_parastype_full_ung <- readRDS("./Data/JPEK/full/full_brm_unggroup_parastype_me.RDS")
+# ...simple
+marginal_parastype_simple_carn <- readRDS("./Data/JPEK/simple/simp_brm_carngroup_parastype_me.RDS")
+marginal_parastype_simple_ung <- readRDS("./Data/JPEK/simple/simp_brm_unggroup_parastype_me.RDS")
+marginal_parastype_simple_prim <- readRDS("./Data/JPEK/simple/simp_brm_primgroup_parastype_me.RDS")
 
 # # FULL PARAS TRANS
 # fullDat_parastrans <- allDat %>%
@@ -113,15 +132,12 @@ marginal_simple_full_prim <- readRDS("./Data/JPEK/simple/simp_brm_primgroup_me.R
 # 
 # fullDat_parastype <- fullDat_parastype[complete.cases(fullDat_parastype),] # 232
 
-
-
-
 ### EXAMINE COEFFICIENTS ----
 # NOTES:
 # > For total richness response, model coefficients should be exponentiated to get the estimated richness
 # > For parasite transmission and type responses, model coefficients are log-odds. Exponentiate the coefficient to get odds. To get probability, use the equation: exp(coef) / (1 + exp(coef)). The function 'plogis' calculates the latter, so you just use plogis(coef)
 # 
-### RESULTS FOR TOTAL RICHNESS ON FULL MODELS (SIGNIF. WITH ASTERISK) ----
+# RESULTS ----
 # ...carnivores
 # > *(+ CITATIONS) PR INCREASES as host CITATIONS increases. The interaction between host citations & IUCN status is not significant.
 # > *(INTERACTION IUCN:SPECIES RANGE) There is a significant interaction between SPECIES RANGE and IUCN STATUS for parasite richness. Therefore, we can't say <<<<<< 
@@ -146,10 +162,14 @@ marginal_simple_full_prim <- readRDS("./Data/JPEK/simple/simp_brm_primgroup_me.R
 # > *(+ LIFESPAN) species that have longer LIFESPAN have HIGHER PR
 # > NS(LATITUDE) absolute mean LATITUDE is NOT IMPORTANT
 
-modlist <- list(carnivores = mod_rich_full_carn, ungulates = mod_rich_full_ung, primates = mod_rich_full_prim)
-
+# ...simple models
+# > For CARNIVORES, PR richness did not differ by threat status
+# > For UNGULATES, threatened species had lower PR
+# > For PRIMATES, 
+# modlist <- list(carnivores = mod_rich_full_carn, ungulates = mod_rich_full_ung, primates = mod_rich_full_prim)
+modlist <- list(carnivores = mod_rich_simple_carn, ungulates = mod_rich_simple_ung, primates = mod_rich_simple_prim)
 # Parasite richness
-lapply(modlist, fixef)
+lapply(modlist_simple, fixef)
 
 # GENERATE COEFFICIENT PLOTS ----
 # NOTE: Only look at coefficients that both simple and full models estimate.
@@ -196,18 +216,15 @@ FuncPlotCoef(mod_list = list(simple_parastrans_fulldat = simple_mod_parastrans_f
 FuncPlotCoef(mod_list = list(simple_parastype_fulldat = simple_mod_parastype_fulldat, full_parastype = full_mod_parastype), terms_vec = c("Intercept", "combIUCNthreatened", "hostGroupprimates", "hostGroupungulates", "logNumHostCitations", "combIUCNthreatened:hostGroupprimates", "combIUCNthreatened:hostGroupungulates", "combIUCNthreatened:logNumHostCitations"))
 
 ### MARGINAL EFFECTS ----
-marg_list <- marginal_rich_full_prim 
-group_nam <- "prim"
+marg_list <- marginal_parastype_full_ung # <<<<<<< USER SET
+group_nam <- "ung" # <<<<<<< USER SET
 
 for(i in 1:length(marg_list)) {
-pdf(paste0("./Results/model-summaries-group/marginal_rich_full/marginal_rich_full_", group_nam, "_", names(marginal_rich_full_carn)[i], ".pdf"))
+pdf(paste0("./Results/model-summaries-group/marginal_parastype_full/marginal_parastype_full_", group_nam, "_", names(marg_list)[i], ".pdf")) # <<<<<<< USER SET
 plot(marg_list[[i]] +
-  labs(y = "Parasite richness") +
-  # scale_x_continuous(trans='log', breaks= pretty_breaks()) +
-  # scale_y_continuous(trans='log', breaks= pretty_breaks()) +
+  labs(y = "Parasite type") +
   scale_color_brewer(palette = "Dark2") +
   scale_fill_brewer(palette = "Dark2") +
   theme_bw(base_size = 10))
-# theme(axis.text.x = element_text(angle = 90, hjust = 1))
 dev.off()
 }
