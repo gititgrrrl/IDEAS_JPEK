@@ -65,6 +65,9 @@ library(glmmTMB)
 allIntBrm_carngroup_c <- readRDS("./Data/JPEK/allInt/allInt_brm_carngroup_c_all.RDS")
 allInt_carngroup_c_me <- plot(marginal_effects(allIntBrm_carngroup_c), method = "fitted", plot = FALSE)
 saveRDS(allInt_carngroup_c_me, "./Data/JPEK/allInt/allInt_brm_carngroup_c_me.RDS")
+# specifically for plotting groupsize-by-threat effects
+allInt_carngroup_c_me_groupsize <- marginal_effects(allIntBrm_carngroup_c, effects = "groupSizeCar:combIUCN", method = "fitted")
+saveRDS(allInt_carngroup_c_me_groupsize, "./Data/JPEK/allInt/allInt_brm_carngroup_c_me_groupsize.RDS")
 
 # #...primates
 # fullDat_primgroup <- allDat %>%
@@ -102,6 +105,12 @@ saveRDS(allInt_carngroup_c_me, "./Data/JPEK/allInt/allInt_brm_carngroup_c_me.RDS
 fullBrm_primgroup_c <- readRDS("./Data/JPEK/full/full_brm_primgroup_c_all.RDS")
 full_primgroup_c_me <- plot(marginal_effects(fullBrm_primgroup_c), method = "fitted", plot = FALSE)
 saveRDS(full_primgroup_c_me, "./Data/JPEK/full/full_brm_primgroup_c_me.RDS")
+# specifically for plotting groupsize-by-threat effects
+full_primgroup_c_me_groupsize <- marginal_effects(fullBrm_primgroup_c, effects = "logGroupSizePriUng_c:combIUCN", method = "fitted")
+saveRDS(full_primgroup_c_me_groupsize, "./Data/JPEK/full/full_brm_primgroup_c_me_groupsize.RDS")
+# specifically for plotting range-by-threat effects
+full_primgroup_c_me_speciesrange <- marginal_effects(fullBrm_primgroup_c, effects = "logHostSpeciesRange_c:combIUCN", method = "fitted")
+saveRDS(full_primgroup_c_me_speciesrange, "./Data/JPEK/full/full_brm_primgroup_c_me_speciesrange.RDS")
 #
 # #...ungulates
 # fullDat_unggroup <- allDat %>%
@@ -138,8 +147,14 @@ saveRDS(full_primgroup_c_me, "./Data/JPEK/full/full_brm_primgroup_c_me.RDS")
 
 # marginal effects
 fullBrm_unggroup_c <- readRDS("./Data/JPEK/full/full_brm_unggroup_c_all.RDS")
-full_unggroup_me_c <- plot(marginal_effects(fullBrm_unggroup_c), method = "fitted", plot = FALSE)
-saveRDS(full_unggroup_me_c, "./Data/JPEK/full/full_brm_unggroup_c_me.RDS")
+full_unggroup_c_me <- plot(marginal_effects(fullBrm_unggroup_c), method = "fitted", plot = FALSE)
+saveRDS(full_unggroup_c_me, "./Data/JPEK/full/full_brm_unggroup_c_me.RDS")
+# specifically for plotting groupsize-by-threat effects
+full_unggroup_c_me_groupsize <- marginal_effects(fullBrm_unggroup_c, effects = "logGroupSizePriUng_c:combIUCN", method = "fitted")
+saveRDS(full_unggroup_c_me_groupsize, "./Data/JPEK/full/full_brm_unggroup_c_me_groupsize.RDS")
+# specifically for plotting range-by-threat effects
+full_unggroup_c_me_speciesrange <- marginal_effects(fullBrm_unggroup_c, effects = "logHostSpeciesRange_c:combIUCN", method = "fitted")
+saveRDS(full_unggroup_c_me_speciesrange, "./Data/JPEK/full/full_brm_unggroup_c_me_speciesrange.RDS")
 #
 # # PARASITE RICHNESS IS RESPONSE, SIMPLE MODELS ----
 # ...carnivores
