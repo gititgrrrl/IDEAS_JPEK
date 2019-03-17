@@ -64,7 +64,7 @@ library(glmmTMB)
 # marginal effects
 allIntBrm_carngroup_c <- readRDS("./Data/JPEK/allInt/allInt_brm_carngroup_c_all.RDS")
 allInt_carngroup_c_me <- plot(marginal_effects(allIntBrm_carngroup_c), method = "fitted", plot = FALSE)
-saveRDS(allInt_carngroup_c_me, "./Data/JPEK/full/allInt_carngroup_c_me.RDS")
+saveRDS(allInt_carngroup_c_me, "./Data/JPEK/allInt/allInt_brm_carngroup_c_me.RDS")
 
 # #...primates
 # fullDat_primgroup <- allDat %>%
