@@ -36,10 +36,9 @@ kable(bestModSummary, caption = "Best fit models for each group-response combina
 
 # model coefficients
 
-### --- RESPONSE 1: PARASITE RICHNESS --- ###
-allIntBrm_carngroup_c <- readRDS("./Data/JPEK/allInt/allInt_brm_carngroup_c_all.RDS") # carnivores complete
-fullBrm_primgroup_c <- readRDS("./Data/JPEK/full/full_brm_primgroup_c_all.RDS") # primate reduced
-fullBrm_unggroup_c <- saveRDS("./Data/JPEK/full/full_brm_unggroup_c_all.RDS") # ungulate reduced
+source("Scripts/combined-workflow/script14_tablecalcs.R")
+
+summary(modRichBest_list[[1]])
 
 
 
