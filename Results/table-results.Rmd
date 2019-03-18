@@ -1,0 +1,47 @@
+---
+title: "Manuscript tables"
+output: word_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(knitr)
+library(magrittr)
+
+```
+
+```{r}
+
+temp <- expand.grid(
+  Group = c("Carnivores", "Primates", "Ungulates"),
+  Response = c("Host parasite richness", "Proportion closely transmitted", "Proportion microparasites"))
+bestModSummary <- data.frame(
+  temp,
+  `Best model overall` = c("Complete", "Reduced", "Reduced", 
+               "Reduced", "Complete", "Simple",
+               "Complete", "Simple", "Reduced"), # the model with lowest AIC
+  `Best complex model` = c("Complete", "Reduced", "Reduced", 
+                   "Reduced", "Complete", "Reduced",
+                   "Complete", "Complete", "Reduced")) # between the two complex models, which one has lower AIC
+
+
+kable(bestModSummary, caption = "Best fit models for each group-response combination measured by AIC. Simple models only include threat status (NT or T) and log-citations. Complete complex models include all host traits and all interactions with threat status. Complete reduced models include some host traits and interactions as included if lower AIC. ")
+
+```
+
+
+```{r}
+
+# model coefficients
+
+### --- RESPONSE 1: PARASITE RICHNESS --- ###
+allIntBrm_carngroup_c <- readRDS("./Data/JPEK/allInt/allInt_brm_carngroup_c_all.RDS") # carnivores complete
+fullBrm_primgroup_c <- readRDS("./Data/JPEK/full/full_brm_primgroup_c_all.RDS") # primate reduced
+fullBrm_unggroup_c <- saveRDS("./Data/JPEK/full/full_brm_unggroup_c_all.RDS") # ungulate reduced
+
+
+
+```
+
