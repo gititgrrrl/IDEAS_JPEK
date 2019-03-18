@@ -1,7 +1,9 @@
 ---
 title: "Manuscript tables"
-output: word_document
-editor_options: 
+output:
+  pdf_document: default
+  word_document: default
+editor_options:
   chunk_output_type: console
 ---
 
@@ -35,10 +37,35 @@ kable(bestModSummary, caption = "Best fit models for each group-response combina
 ```{r}
 
 # model coefficients
-
+setwd("~/IDEAS_JPEK")
 source("Scripts/combined-workflow/script14_tablecalcs.R")
 
-summary(modRichBest_list[[1]])
+get_table <- function(brm_mod, Group){
+  out <- as.data.frame(fixef(brm_mod))
+  out=cbind(predictor=rownames(out), out)
+  rownames(out) <- c()
+  out=cbind(Group=Group, out)
+  return(out)
+}
+
+
+richnessCoef <- rbind(get_table(modRichBest_list[[1]], "Carnivores"),
+      get_table(modRichBest_list[[2]], "Primates"),
+      get_table(modRichBest_list[[3]], "Ungulates"))
+
+transmissCoef <- rbind(get_table(modParasTransBest_list[[1]], "Carnivores"),
+      get_table(modParasTransBest_list[[2]], "Primates"),
+      get_table(modParasTransBest_list[[3]], "Ungulates"))
+
+typeCoef <- rbind(get_table(modParasTypeBest_list[[1]], "Carnivores"),
+      get_table(modParasTypeBest_list[[2]], "Primates"),
+      get_table(modParasTypeBest_list[[3]], "Ungulates"))
+
+kable(richnessCoef, digits = 3, caption = "Model coefficients and highest posterior density region for best fit model of host-parasite species richness. ")
+
+kable(transmissCoef, digits = 3, caption = "Model coefficients and highest posterior density region for best fit model of proportion of only closely transmitted parasites. ")
+
+kable(typeCoef, digits = 3, caption = "Model coefficients and highest posterior density region for best fit model of proportion of only microparasites (bacteria, viruses, protozoa, fungi). ")
 
 
 

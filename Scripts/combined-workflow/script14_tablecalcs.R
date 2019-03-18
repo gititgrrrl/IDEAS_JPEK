@@ -26,6 +26,6 @@ modParasTransBest_list <- list(
 
 # Parasite type
 modParasTypeBest_list <- list(
-  carnivores = readRDS("./Data/JPEK/allInt/allInt_brm_carngroup_c_ParasType.RDS"),
-  primates = readRDS("./Data/JPEK/simple/simp_brm_primgroup_c_ParasType.RDS"),
-  ungulates = readRDS("./Data/JPEK/full/full_brm_unggroup_c_ParasType.RDS"))
+  carnivores = readRDS("./Data/JPEK/allInt/allInt_brm_carngroup_c_parastype.RDS"),
+  primates = readRDS("./Data/JPEK/simple/simp_brm_primgroup_c_parastype.RDS"),
+  ungulates = readRDS("./Data/JPEK/full/full_brm_unggroup_c_parastype.RDS"))
