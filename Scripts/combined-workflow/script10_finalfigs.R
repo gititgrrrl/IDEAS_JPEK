@@ -27,11 +27,11 @@ bestModSummary <- data.frame(
 
 ### FIG.1 REDO (best models only) ----
 # Effects of threat status on response (richness, % direct transmission, % micro-parasites) for the best-supported model, separately for each host group
-# Parasite richness
+# Parasite richness <<<<<<<<<<<<<<<<<<< NEED TO FIX FOR FINAL, TO GET CENTERED RESULTS!
 margRichBest_list <- list(
-  carnivores = readRDS("./Data/JPEK/allInt/allInt_brm_carngroup_c_me.RDS")$`combIUCN:groupSizeCar`$data[c("combIUCN", "groupSizeCar", "estimate__", "lower__", "upper__")],
-  primates = readRDS("./Data/JPEK/full/full_brm_primgroup_c_me.RDS")$combIUCN$data[c("combIUCN", "estimate__", "lower__", "upper__")],
-  ungulates = readRDS("./Data/JPEK/full/full_brm_unggroup_c_me.RDS")$combIUCN$data[c("combIUCN", "estimate__", "lower__", "upper__")])
+  carnivores = readRDS("./Data/JPEK/full/full_brm_carngroup_me.RDS")$`combIUCN:groupSizeCar`$data[c("combIUCN", "groupSizeCar", "estimate__", "lower__", "upper__")],# <<<<<<< CHANGE TO "./Data/JPEK/allInt/allInt_brm_carngroup_me.RDS"
+  primates = readRDS("./Data/JPEK/full/full_brm_primgroup_me.RDS")$combIUCN$data[c("combIUCN", "estimate__", "lower__", "upper__")], # <<<<<<<<<< CHANGE TO "./Data/JPEK/full/full_brm_primgroup_c_me.RDS"
+  ungulates = readRDS("./Data/JPEK/full/full_brm_unggroup_me.RDS")$combIUCN$data[c("combIUCN", "estimate__", "lower__", "upper__")]) # <<<<<< CHANGE TO "./Data/JPEK/full/full_brm_unggroup_c_me.RDS"
 margRichBest_df <- rbind.fill(margRichBest_list)
 margRichBest_df$hostGroup <- c(rep("carnivores", 4), rep("primates", 2), rep("ungulates", 2))
 levels(margRichBest_df$combIUCN) <- list(NT = "not_threatened", T = "threatened")
@@ -120,12 +120,12 @@ FuncPlot1 <- function(dat, y_nam, remove_xlab, add_title) {
   plot_row <- plot_grid(carn_plot, prim_plot, ung_plot, nrow = 1, rel_widths = c(1, 0.8, 0.8))
   return(plot_row)
 }
-
+margRich_fig <- FuncPlot1(dat = margRichBest_df, y_nam = "Parasite Richness", add_title = TRUE, remove_xlab = TRUE)
 margParasTrans_fig <- FuncPlot1(dat = margParasTransBest_df, y_nam = "% Direct-Obligate", add_title = FALSE, remove_xlab = TRUE)
 margParasType_fig <- FuncPlot1(dat = margParasTypeBest_df, y_nam = "% Micro-Parasite", add_title = FALSE, remove_xlab = FALSE)
-fig1_final <- plot_grid(margParasTrans_fig, margParasType_fig, ncol = 1, rel_heights = c(0.85, 1))
+fig1_final <- plot_grid(margRich_fig, margParasTrans_fig, margParasType_fig, ncol = 1, rel_heights = c(0.85, 1, 1))
 
-pdf("./Results/FINAL-FIGS/fig1_final.pdf")
+pdf("./Results/FINAL-FIGS/FIG_condeffects_threat.pdf")
 fig1_final
 dev.off()
 
@@ -241,6 +241,47 @@ dev.off()
 # fig1_final
 # dev.off()
   
+### FIG.2 REDO----
+# Marginal effects plots for IUCN:group size interaction FOR RICHNESS
+# <<<<<< NEED TO REDO WITH CENTERED RESULTS
+carn_groupsize <- readRDS("./Data/JPEK/full/full_brm_carngroup_me.RDS")
+carn_groupMarg_plot <- plot(carn_groupsize$`combIUCN:groupSizeCar`) +
+  scale_color_grey() +
+  scale_fill_grey() +
+  ylim(0, 40) +
+  labs(x = "Threat Status", y = "Parasite Richness", title = "carnivores") +
+  theme_bw(base_size = 10) +
+  scale_x_discrete(limits = c("not_threatened", "threatened"), labels=c("threatened" = "T", "not_threatened" = "NT")) +
+  theme(legend.position = c(0.8, 0.9))
+
+prim_groupsize <- readRDS("./Data/JPEK/full/full_brm_primgroup_me.RDS")
+prim_groupMarg_plot <- plot(prim_groupsize$`logGroupSizePriUng:combIUCN`) +
+  scale_color_brewer(palette = "Set2") +
+  scale_fill_brewer(palette = "Set2") +
+  ylim(0, 40) + # <<<<<<<<<<<<<
+  labs(x = "log(Group Size)", title = "primates") +
+  theme_bw(base_size = 10) +
+  theme(legend.position = c(0.8, 0.9))
+
+ung_groupsize <- readRDS("./Data/JPEK/full/full_brm_unggroup_me.RDS")
+ung_groupMarg_plot <- plot(ung_groupsize$`logGroupSizePriUng:combIUCN`) +
+  scale_color_brewer(palette = "Set2") +
+  scale_fill_brewer(palette = "Set2") +
+  ylim(0, 40) + # <<<<<<<<<<<<<
+  labs(x = "log(Group Size)", title = "ungulates") +
+  theme_bw(base_size = 10) +
+  theme(legend.position = c(0.8, 0.9)) 
+# +
+#   theme(axis.title.y=element_blank(),
+#         axis.text.y=element_blank(),
+#         axis.ticks.y=element_blank())
+#         
+fig2_final <- plot_grid(carn_groupMarg_plot, prim_groupMarg_plot, ung_groupMarg_plot, nrow = 1, rel_widths = c(1, 0.85, 0.85))
+
+pdf("./Results/FINAL-FIGS/fig2_final.pdf")
+fig2_final
+dev.off()
+
 ### FIG.2 ----
 # Marginal effects plots for IUCN:group size interaction FOR RICHNESS
 # <<<<<< WAIT FOR CENTERED RESULTS
@@ -286,47 +327,3 @@ pdf("./Results/FINAL-FIGS/fig2_final.pdf")
 fig2_final
 dev.off()
 
-### FIG.3 ----
-# Marginal effects plots for IUCN:species range interaction FOR RICHNESS
-# <<<<<< WAIT FOR CENTERED RESULTS
-allInt_carngroup_c_me_speciesrange <- readRDS("./Data/JPEK/allInt/allInt_brm_carngroup_c_me_speciesrange.RDS")
-carn_rangeMarg_plot <- plot(allInt_carngroup_c_me_speciesrange, plot = FALSE)[[1]] +
-  scale_color_grey() +
-  scale_fill_grey() +
-  ylim(xxx, xxx) + # <<<<<<<<<<<<<
-  scale_y_continuous(breaks= pretty_breaks()) +
-  labs(x = "log(Species Range)", y = "Parasite Richness", subtitle = "carnivores") +
-  theme_bw(base_size = 10) +
-  theme(legend.position = "none") 
-
-full_primgroup_c_me_speciesrange <- readRDS("./Data/JPEK/full/full_brm_primgroup_c_me_speciesrange.RDS")
-prim_rangeMarg_plot <- plot(full_primgroup_c_me_speciesrange, plot = FALSE)[[1]] +
-  scale_color_grey() +
-  scale_fill_grey() +
-  ylim(xxx, xxx) + # <<<<<<<<<<<<<
-  labs(x = "log(Species Range)", subtitle = "primates") +
-  theme_bw(base_size = 10) +
-  theme(legend.position = "none") 
-# +
-#   theme(axis.title.y=element_blank(),
-#         axis.text.y=element_blank(),
-#         axis.ticks.y=element_blank())
-
-fullBrm_unggroup_c_me_speciesrange <- readRDS("./Data/JPEK/full/full_brm_unggroup_c_me_speciesrange.RDS")
-ung_rangeMarg_plot <- plot(fullBrm_unggroup_c_me_speciesrange, plot = FALSE)[[1]] +
-  scale_color_grey() +
-  scale_fill_grey() +
-  ylim(xxx, xxx) + # <<<<<<<<<<<<<
-  labs(x = "log(Species Range)", subtitle = "ungulates") +
-  theme_bw(base_size = 10) +
-  theme(legend.position = "none") 
-# +
-#   theme(axis.title.y=element_blank(),
-#         axis.text.y=element_blank(),
-#         axis.ticks.y=element_blank())
-#         
-fig3_final <- plot_grid(carn_rangeMarg_plot, prim_rangeMarg_plot, ung_rangeMarg_plot, nrow = 1, rel_widths = c(1, 0.85, 0.85))
-
-pdf("./Results/FINAL-FIGS/fig3_final.pdf")
-fig3_final
-dev.off()

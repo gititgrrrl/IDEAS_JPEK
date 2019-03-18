@@ -1,0 +1,70 @@
+---
+title: "Manuscript tables"
+output:
+  pdf_document: default
+  word_document: default
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(knitr)
+library(magrittr)
+
+```
+
+```{r}
+
+temp <- expand.grid(
+  Group = c("Carnivores", "Primates", "Ungulates"),
+  Response = c("Host parasite richness", "Proportion closely transmitted", "Proportion microparasites"))
+bestModSummary <- data.frame(
+  temp,
+  `Best model overall` = c("Complete", "Reduced", "Reduced", 
+               "Reduced", "Complete", "Simple",
+               "Complete", "Simple", "Reduced"))
+
+
+kable(bestModSummary, caption = "TABLE S1. Best fit models for each group-response combination measured by AIC. Simple models only include threat status (NT or T) and log-citations. Complete models include all host traits interacting with threat status. Reduced models include all host traits but only a subset of interactions with threat status. ")
+
+```
+
+
+```{r}
+
+# model coefficients
+setwd("~/IDEAS_JPEK")
+source("./Scripts/combined-workflow/script14_tablecalcs.R")
+
+get_table <- function(brm_mod, Group){
+  out <- as.data.frame(fixef(brm_mod))
+  out=cbind(predictor=rownames(out), out)
+  rownames(out) <- c()
+  out=cbind(Group=Group, out)
+  return(out)
+}
+
+
+richnessCoef <- rbind(get_table(modRichBest_list[[1]], "Carnivores"),
+      get_table(modRichBest_list[[2]], "Primates"),
+      get_table(modRichBest_list[[3]], "Ungulates"))
+
+transmissCoef <- rbind(get_table(modParasTransBest_list[[1]], "Carnivores"),
+      get_table(modParasTransBest_list[[2]], "Primates"),
+      get_table(modParasTransBest_list[[3]], "Ungulates"))
+
+typeCoef <- rbind(get_table(modParasTypeBest_list[[1]], "Carnivores"),
+      get_table(modParasTypeBest_list[[2]], "Primates"),
+      get_table(modParasTypeBest_list[[3]], "Ungulates"))
+
+kable(richnessCoef, digits = 3, caption = "TABLE S2. Model coefficients and highest posterior density region for best fit model of PARASITE SPECIES RICHNESS. ")
+
+kable(transmissCoef, digits = 3, caption = "TABLE S3. Model coefficients and highest posterior density region for best fit model of PROPORTION OF CLOSELY TRANSMITTED PARASITES. ")
+
+kable(typeCoef, digits = 3, caption = "TABLE S4. Model coefficients and highest posterior density region for best fit model of PROPORTION OF MICROPARASITES (bacteria, viruses, protozoa, fungi). ")
+
+
+
+```
+
