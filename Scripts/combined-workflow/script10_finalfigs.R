@@ -244,41 +244,42 @@ dev.off()
 ### FIG.2 REDO----
 # Marginal effects plots for IUCN:group size interaction FOR RICHNESS
 # <<<<<< NEED TO REDO WITH CENTERED RESULTS
-carn_groupsize <- readRDS("./Data/JPEK/full/full_brm_carngroup_me.RDS")
+# carn_groupsize <- readRDS("./Data/JPEK/full/full_brm_carngroup_me.RDS")
 carn_groupMarg_plot <- plot(carn_groupsize$`combIUCN:groupSizeCar`) +
   scale_color_grey() +
   scale_fill_grey() +
   ylim(0, 40) +
-  labs(x = "Threat Status", y = "Parasite Richness", title = "carnivores") +
+  labs(x = "Threat Status", y = "Parasite Richness", subtitle = "Carnivores") +
   theme_bw(base_size = 10) +
   scale_x_discrete(limits = c("not_threatened", "threatened"), labels=c("threatened" = "T", "not_threatened" = "NT")) +
-  theme(legend.position = c(0.8, 0.9))
+  theme(legend.position = c(0.75, 0.85),
+        legend.title=element_blank())
 
-prim_groupsize <- readRDS("./Data/JPEK/full/full_brm_primgroup_me.RDS")
+# prim_groupsize <- readRDS("./Data/JPEK/full/full_brm_primgroup_me.RDS")
 prim_groupMarg_plot <- plot(prim_groupsize$`logGroupSizePriUng:combIUCN`) +
-  scale_color_brewer(palette = "Set2") +
-  scale_fill_brewer(palette = "Set2") +
+  scale_color_manual(values = c("seagreen4", "tomato2"), labels = c("threatened" = " T", "not_threatened" = " NT")) +
+  scale_fill_manual(values = c("seagreen4", "tomato2"), labels = c("threatened" = " T", "not_threatened" = " NT")) +
   ylim(0, 40) + # <<<<<<<<<<<<<
-  labs(x = "log(Group Size)", title = "primates") +
+  labs(x = "log(Group Size)", subtitle = "Primates") +
   theme_bw(base_size = 10) +
-  theme(legend.position = c(0.8, 0.9))
+  theme(legend.position = c(0.75, 0.85),
+        legend.title=element_blank(),
+        axis.title.y=element_blank())
 
-ung_groupsize <- readRDS("./Data/JPEK/full/full_brm_unggroup_me.RDS")
+# ung_groupsize <- readRDS("./Data/JPEK/full/full_brm_unggroup_me.RDS")
 ung_groupMarg_plot <- plot(ung_groupsize$`logGroupSizePriUng:combIUCN`) +
-  scale_color_brewer(palette = "Set2") +
-  scale_fill_brewer(palette = "Set2") +
   ylim(0, 40) + # <<<<<<<<<<<<<
-  labs(x = "log(Group Size)", title = "ungulates") +
+  scale_color_manual(guide = guide_legend(reverse=TRUE),values = c("tomato2", "seagreen4"), labels = c("threatened" = " T", "not_threatened" = " NT")) +
+  scale_fill_manual(guide = guide_legend(reverse=TRUE),values = c("tomato2", "seagreen4"), labels = c("threatened" = " T", "not_threatened" = " NT")) +
+  labs(x = "log(Group Size)", subtitle = "Ungulates") +
   theme_bw(base_size = 10) +
-  theme(legend.position = c(0.8, 0.9)) 
-# +
-#   theme(axis.title.y=element_blank(),
-#         axis.text.y=element_blank(),
-#         axis.ticks.y=element_blank())
+  theme(legend.position = c(0.75, 0.85),
+        legend.title=element_blank(),
+        axis.title.y=element_blank()) 
 #         
 fig2_final <- plot_grid(carn_groupMarg_plot, prim_groupMarg_plot, ung_groupMarg_plot, nrow = 1, rel_widths = c(1, 0.85, 0.85))
 
-pdf("./Results/FINAL-FIGS/fig2_final.pdf")
+pdf("./Results/FINAL-FIGS/FIG_groupsize_rich.pdf", width=7, height=3.5)
 fig2_final
 dev.off()
 
