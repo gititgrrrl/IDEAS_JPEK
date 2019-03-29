@@ -21,7 +21,7 @@ phyla <- select(phyla_raw, "Binomial.1.2", "Order.1.2", "Family.1.2",
          IUCN=IUCN.Status.1.2,
          massG=Mass.g) %>%
   mutate(massKG=massG/1000) %>% # (Ellen) changed colname to KG b/c dividing by 1000
-  mutate(combIUCN = ifelse(IUCN %in% c("CR", "EN", "VU", "NT"), "threatened", ifelse(IUCN=="LC", "not_threatened", NA)))
+  mutate(combIUCN = ifelse(IUCN %in% c("CR", "EN", "VU"), "threatened", ifelse(IUCN %in% c("NT", "LC"), "not_threatened", NA))) # 03/28/19, EC changed to conform with more typical division of threat vs. non-threat
 
 
 # --- Then we right join matching rows from phyla to GMPD ---

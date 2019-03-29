@@ -21,7 +21,7 @@ GMPD_par_traits_raw <- read_csv("Data/GMPD/GMPD_parasite_traits.csv")
 
 GMPD <- GMPD_raw %>% 
   mutate(HostCorrectedName=gsub(pattern=" ", x=HostCorrectedName, replacement = "_")) %>%
-  rename(hostName=HostCorrectedName, parasiteName=ParasiteCorrectedName,
+  dplyr::rename(hostName=HostCorrectedName, parasiteName=ParasiteCorrectedName,
          hostGroup=Group,
          parType=ParType, parPhylum=ParPhylum, prevalence=Prevalence, 
          hostsSampled=HostsSampled, samplingType=SamplingType, 
@@ -32,6 +32,7 @@ GMPD <- GMPD_raw %>%
 GMPD %<>% 
   filter(parasiteName != "ABOLISHED", 
          parasiteName != "not identified to genus", 
+         HasBinomialName == "yes", # 3/28/19 Ellen--we decided to revert back to only using parasites identified to species
          parasiteName != "SPLITTED in ICTV") %>% 
   filter(prevalence>0) # parasite prevalence greater than 0
 
