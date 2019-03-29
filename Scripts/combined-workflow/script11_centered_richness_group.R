@@ -1,5 +1,5 @@
-rm(list=ls())
-
+# rm(list=ls())
+# 
 ### LOAD PACKAGES ----
 # packages <- c("magrittr", "cowplot", "GGally", "scales", "tidyverse", "rstan",
 #               "brms", "broom", "tidybayes", "purrr", "glmmTMB")
@@ -107,47 +107,48 @@ fullDat_unggroup_c <- fullDat_unggroup %>%
 # full_totrich_carngroup_mod <- add_ic(full_totrich_carngroup_mod, ic = "loo", reloo = TRUE)
 # full_totrich_carngroup_mod <- add_ic(full_totrich_carngroup_mod, ic = "kfold")
 # saveRDS(full_totrich_carngroup_mod, "./FINAL/full/full_totrich_carngroup_mod.RDS")
-
-# model fits, predictions and residuals
-full_totrich_carngroup_mod <- readRDS("./FINAL/full/full_totrich_carngroup_mod.RDS")
-full_totrich_carngroup_fitted <- fitted(full_totrich_carngroup_mod)
-full_totrich_carngroup_predict <- predict(full_totrich_carngroup_mod)
-full_totrich_carngroup_resid <- residuals(full_totrich_carngroup_mod, type = "pearson")
-
-# save outputs
-saveRDS(full_totrich_carngroup_fitted, "./FINAL/full/full_totrich_carngroup_fitted.RDS")
-saveRDS(full_totrich_carngroup_predict, "./FINAL/full/full_totrich_carngroup_predict.RDS")
-saveRDS(full_totrich_carngroup_resid, "./FINAL/full/full_totrich_carngroup_resid.RDS")
-
-# marginal effects
-full_totrich_carngroup_marginal <- plot(marginal_effects(full_totrich_carngroup_mod), method = "fitted", plot = FALSE)
-saveRDS(full_totrich_carngroup_marginal, "./FINAL/full/full_totrich_carngroup_marginal.RDS")
+# 
+# # model fits, predictions and residuals
+# full_totrich_carngroup_mod <- readRDS("./FINAL/full/full_totrich_carngroup_mod.RDS")
+# full_totrich_carngroup_fitted <- fitted(full_totrich_carngroup_mod)
+# full_totrich_carngroup_predict <- predict(full_totrich_carngroup_mod)
+# full_totrich_carngroup_resid <- residuals(full_totrich_carngroup_mod, type = "pearson")
+# 
+# # save outputs
+# saveRDS(full_totrich_carngroup_fitted, "./FINAL/full/full_totrich_carngroup_fitted.RDS")
+# saveRDS(full_totrich_carngroup_predict, "./FINAL/full/full_totrich_carngroup_predict.RDS")
+# saveRDS(full_totrich_carngroup_resid, "./FINAL/full/full_totrich_carngroup_resid.RDS")
+# 
+# # marginal effects
+# full_totrich_carngroup_marginal <- plot(marginal_effects(full_totrich_carngroup_mod), method = "fitted", plot = FALSE)
+# saveRDS(full_totrich_carngroup_marginal, "./FINAL/full/full_totrich_carngroup_marginal.RDS")
 
 # specifically for plotting groupsize-by-threat effects
+full_totrich_carngroup_mod <- readRDS("./FINAL/full/full_totrich_carngroup_mod.RDS")
 full_totrich_carngroup_marginal_groupsize <- marginal_effects(full_totrich_carngroup_mod, effects = "groupSizeCar:combIUCN", method = "fitted")
 saveRDS(full_totrich_carngroup_marginal_groupsize, "./FINAL/full/full_totrich_carngroup_marginal_groupsize.RDS")
 
-# ...primates
-full_totrich_primgroup_mod <- brm(
-  data = fullDat_primgroup_c,
-  family = poisson,
-  formula = bf(parRich | trunc(lb = 1) ~
-                 combIUCN*logNumHostCitations_c +
-                 combIUCN*logGroupSizePriUng_c +
-                 logHostSpeciesRange_c +
-                 logHostMass_c),
-  iter =4000, warmup = 2000, chains = 4, cores = 4,
-  control = list(adapt_delta = .8, max_treedepth = 10))  # may wnat to increase max_tree depth although all converged
-
+# # ...primates
+# full_totrich_primgroup_mod <- brm(
+#   data = fullDat_primgroup_c,
+#   family = poisson,
+#   formula = bf(parRich | trunc(lb = 1) ~
+#                  combIUCN*logNumHostCitations_c +
+#                  combIUCN*logGroupSizePriUng_c +
+#                  logHostSpeciesRange_c +
+#                  logHostMass_c),
+#   iter =4000, warmup = 2000, chains = 4, cores = 4,
+#   control = list(adapt_delta = .8, max_treedepth = 10))  # may wnat to increase max_tree depth although all converged
+# 
 # # quick checks
 # summary(full_totrich_primgroup_mod)
 # plot(full_totrich_primgroup_mod)
 # pp_check(full_totrich_primgroup_mod, nsamples = 500)
-
-# add information criteria
-full_totrich_primgroup_mod <- add_ic(full_totrich_primgroup_mod, ic = "loo", reloo = TRUE)
-full_totrich_primgroup_mod <- add_ic(full_totrich_primgroup_mod, ic = "kfold")
-saveRDS(full_totrich_primgroup_mod, "./FINAL/full/full_totrich_primgroup_mod.RDS")
+# 
+# # add information criteria
+# full_totrich_primgroup_mod <- add_ic(full_totrich_primgroup_mod, ic = "loo", reloo = TRUE)
+# full_totrich_primgroup_mod <- add_ic(full_totrich_primgroup_mod, ic = "kfold")
+# saveRDS(full_totrich_primgroup_mod, "./FINAL/full/full_totrich_primgroup_mod.RDS")
 
 # model fits, predictions and residuals
 full_totrich_primgroup_mod <- readRDS("./FINAL/full/full_totrich_primgroup_mod.RDS")
@@ -168,28 +169,28 @@ saveRDS(full_totrich_primgroup_marginal, "./FINAL/full/full_totrich_primgroup_ma
 full_totrich_primgroup_marginal_groupsize <- marginal_effects(full_totrich_primgroup_mod, effects = "logGroupSizePriUng_c:combIUCN", method = "fitted")
 saveRDS(full_totrich_primgroup_marginal_groupsize, "./FINAL/full/full_totrich_primgroup_marginal_groupsize.RDS")
 
-# ...ungulates
-full_totrich_unggroup_mod <- brm(
-  data = fullDat_unggroup_c,
-  family = poisson,
-  formula = bf(parRich | trunc(lb = 1) ~
-                 combIUCN*logNumHostCitations_c +
-                 combIUCN*logGroupSizePriUng_c +
-                 logHostSpeciesRange_c +
-                 logHostMass_c),
-  iter =4000, warmup = 2000, chains = 4, cores = 4,
-  control = list(adapt_delta = .8, max_treedepth = 10))  # may wnat to increase max_tree depth although all converged
-
+# # ...ungulates
+# full_totrich_unggroup_mod <- brm(
+#   data = fullDat_unggroup_c,
+#   family = poisson,
+#   formula = bf(parRich | trunc(lb = 1) ~
+#                  combIUCN*logNumHostCitations_c +
+#                  combIUCN*logGroupSizePriUng_c +
+#                  logHostSpeciesRange_c +
+#                  logHostMass_c),
+#   iter =4000, warmup = 2000, chains = 4, cores = 4,
+#   control = list(adapt_delta = .8, max_treedepth = 10))  # may wnat to increase max_tree depth although all converged
+# 
 # # quick checks
 # summary(full_totrich_unggroup_mod)
 # plot(full_totrich_unggroup_mod)
 # pp_check(full_totrich_unggroup_mod, nsamples = 500)
-
-# add information criteria
-full_totrich_unggroup_mod <- readRDS("./FINAL/full/full_totrich_unggroup_mod.RDS")
-full_totrich_unggroup_mod <- add_ic(full_totrich_unggroup_mod, ic = "loo", reloo = TRUE)
-full_totrich_unggroup_mod <- add_ic(full_totrich_unggroup_mod, ic = "kfold")
-saveRDS(full_totrich_unggroup_mod, "./FINAL/full/full_totrich_unggroup_mod.RDS")
+# 
+# # add information criteria
+# full_totrich_unggroup_mod <- readRDS("./FINAL/full/full_totrich_unggroup_mod.RDS")
+# full_totrich_unggroup_mod <- add_ic(full_totrich_unggroup_mod, ic = "loo", reloo = TRUE)
+# full_totrich_unggroup_mod <- add_ic(full_totrich_unggroup_mod, ic = "kfold")
+# saveRDS(full_totrich_unggroup_mod, "./FINAL/full/full_totrich_unggroup_mod.RDS")
 
 # model fits, predictions and residuals
 full_totrich_unggroup_mod <- readRDS("./FINAL/full/full_totrich_unggroup_mod.RDS")
@@ -212,24 +213,24 @@ saveRDS(full_totrich_unggroup_marginal_groupsize, "./FINAL/full/full_totrich_ung
 
 
 ### PARASITE RICHNESS IS RESPONSE, SIMPLE MODELS ----
-# ...carnivores
-simple_totrich_carngroup_mod <- brm(
-  data = fullDat_carngroup_c,
-  family = poisson,
-  formula = bf(parRich | trunc(lb = 1) ~
-                 combIUCN*logNumHostCitations_c),
-  iter =4000, warmup = 2000, chains = 4, cores = 4,
-  control = list(adapt_delta = .8, max_treedepth = 10))  # may wnat to increase max_tree depth although all converged
-
+# # ...carnivores
+# simple_totrich_carngroup_mod <- brm(
+#   data = fullDat_carngroup_c,
+#   family = poisson,
+#   formula = bf(parRich | trunc(lb = 1) ~
+#                  combIUCN*logNumHostCitations_c),
+#   iter =4000, warmup = 2000, chains = 4, cores = 4,
+#   control = list(adapt_delta = .8, max_treedepth = 10))  # may wnat to increase max_tree depth although all converged
+# 
 # # quick checks
 # summary(simple_totrich_carngroup_mod)
 # plot(simple_totrich_carngroup_mod)
 # pp_check(simple_totrich_carngroup_mod, nsamples = 500)
-
-# add information criteria
-simple_totrich_carngroup_mod <- add_ic(simple_totrich_carngroup_mod, ic = "loo", reloo = TRUE)
-simple_totrich_carngroup_mod <- add_ic(simple_totrich_carngroup_mod, ic = "kfold")
-saveRDS(simple_totrich_carngroup_mod, "./FINAL/simple/simple_totrich_carngroup_mod.RDS")
+# 
+# # add information criteria
+# simple_totrich_carngroup_mod <- add_ic(simple_totrich_carngroup_mod, ic = "loo", reloo = TRUE)
+# simple_totrich_carngroup_mod <- add_ic(simple_totrich_carngroup_mod, ic = "kfold")
+# saveRDS(simple_totrich_carngroup_mod, "./FINAL/simple/simple_totrich_carngroup_mod.RDS")
 
 # model fits, predictions and residuals
 simple_totrich_carngroup_mod <- readRDS("./FINAL/simple/simple_totrich_carngroup_mod.RDS")
@@ -246,25 +247,25 @@ saveRDS(simple_totrich_carngroup_resid, "./FINAL/simple/simple_totrich_carngroup
 simple_totrich_carngroup_marginal <- plot(marginal_effects(simple_totrich_carngroup_mod), method = "fitted", plot = FALSE)
 saveRDS(simple_totrich_carngroup_marginal, "./FINAL/simple/simple_totrich_carngroup_marginal.RDS")
 
-#...primates
-simple_totrich_primgroup_mod <- brm(
-  data = fullDat_primgroup_c,
-  family = poisson,
-  formula = bf(parRich | trunc(lb = 1) ~
-                 combIUCN*logNumHostCitations_c),
-  iter =4000, warmup = 2000, chains = 4, cores = 4,
-  control = list(adapt_delta = .8, max_treedepth = 10))  # may wnat to increase max_tree depth although all converged
-
+# #...primates
+# simple_totrich_primgroup_mod <- brm(
+#   data = fullDat_primgroup_c,
+#   family = poisson,
+#   formula = bf(parRich | trunc(lb = 1) ~
+#                  combIUCN*logNumHostCitations_c),
+#   iter =4000, warmup = 2000, chains = 4, cores = 4,
+#   control = list(adapt_delta = .8, max_treedepth = 10))  # may wnat to increase max_tree depth although all converged
+# 
 # # quick checks
 # summary(simple_totrich_primgroup_mod)
 # plot(simple_totrich_primgroup_mod)
 # pp_check(simple_totrich_primgroup_mod, nsamples = 500)
-
-# add information criteria
-simple_totrich_primgroup_mod <- add_ic(simple_totrich_primgroup_mod, ic = "loo", reloo = TRUE)
-simple_totrich_primgroup_mod <- add_ic(simple_totrich_primgroup_mod, ic = "kfold")
-saveRDS(simple_totrich_primgroup_mod, "./FINAL/simple/simple_totrich_primgroup_mod.RDS")
-
+# 
+# # add information criteria
+# simple_totrich_primgroup_mod <- add_ic(simple_totrich_primgroup_mod, ic = "loo", reloo = TRUE)
+# simple_totrich_primgroup_mod <- add_ic(simple_totrich_primgroup_mod, ic = "kfold")
+# saveRDS(simple_totrich_primgroup_mod, "./FINAL/simple/simple_totrich_primgroup_mod.RDS")
+# 
 # model fits, predictions and residuals
 simple_totrich_primgroup_mod <- readRDS("./FINAL/simple/simple_totrich_primgroup_mod.RDS")
 simple_totrich_primgroup_fitted <- fitted(simple_totrich_primgroup_mod)
@@ -280,24 +281,24 @@ saveRDS(simple_totrich_primgroup_resid, "./FINAL/simple/simple_totrich_primgroup
 simple_totrich_primgroup_marginal <- plot(marginal_effects(simple_totrich_primgroup_mod), method = "fitted", plot = FALSE)
 saveRDS(simple_totrich_primgroup_marginal, "./FINAL/simple/simple_totrich_primgroup_marginal.RDS")
 
-#...ungulates
-simple_totrich_unggroup_mod <- brm(
-  data = fullDat_unggroup_c,
-  family = poisson,
-  formula = bf(parRich | trunc(lb = 1) ~
-                 combIUCN*logNumHostCitations_c),
-  iter =4000, warmup = 2000, chains = 4, cores = 4,
-  control = list(adapt_delta = .8, max_treedepth = 10))  # may wnat to increase max_tree depth although all converged
-
+# #...ungulates
+# simple_totrich_unggroup_mod <- brm(
+#   data = fullDat_unggroup_c,
+#   family = poisson,
+#   formula = bf(parRich | trunc(lb = 1) ~
+#                  combIUCN*logNumHostCitations_c),
+#   iter =4000, warmup = 2000, chains = 4, cores = 4,
+#   control = list(adapt_delta = .8, max_treedepth = 10))  # may wnat to increase max_tree depth although all converged
+# 
 # # quick checks
 # summary(simple_totrich_unggroup_mod)
 # plot(simple_totrich_unggroup_mod)
 # pp_check(simple_totrich_unggroup_mod, nsamples = 500)
-
-# add information criteria
-simple_totrich_unggroup_mod <- add_ic(simple_totrich_unggroup_mod, ic = "loo", reloo = TRUE)
-simple_totrich_unggroup_mod <- add_ic(simple_totrich_unggroup_mod, ic = "kfold")
-saveRDS(simple_totrich_unggroup_mod, "./FINAL/simple/simple_totrich_unggroup_mod.RDS")
+# 
+# # add information criteria
+# simple_totrich_unggroup_mod <- add_ic(simple_totrich_unggroup_mod, ic = "loo", reloo = TRUE)
+# simple_totrich_unggroup_mod <- add_ic(simple_totrich_unggroup_mod, ic = "kfold")
+# saveRDS(simple_totrich_unggroup_mod, "./FINAL/simple/simple_totrich_unggroup_mod.RDS")
 
 # model fits, predictions and residuals
 simple_totrich_unggroup_mod <- readRDS("./FINAL/simple/simple_totrich_unggroup_mod.RDS")
