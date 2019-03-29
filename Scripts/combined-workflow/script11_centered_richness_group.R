@@ -1,5 +1,4 @@
 rm(list=ls())
-allDat <- read_csv("Data/JPEK/script4.csv") 
 
 ### LOAD PACKAGES ----
 # packages <- c("magrittr", "cowplot", "GGally", "scales", "tidyverse", "rstan",
@@ -26,6 +25,7 @@ library(tidybayes)
 library(purrr)
 library(glmmTMB)
 
+allDat <- read_csv("Data/JPEK/script4.csv") 
 
 ### FORMAT THE DATA----
 # ...carnivores----
@@ -84,29 +84,29 @@ fullDat_unggroup_c <- fullDat_unggroup %>%
 # # Quick check correlation:
 # ggpairs(data = subset(fullDat_unggroup_c, select = -c(hostName, parRich)))
 
-### PARASITE RICHNESS IS RESPONSE, FULL MODELS----
-# ...carnivores----
-full_totrich_carngroup_mod <- brm(
-  data = fullDat_carngroup_c,
-  family = poisson,
-  formula = bf(parRich | trunc(lb = 1) ~
-                 combIUCN*logNumHostCitations_c +
-                 combIUCN*groupSizeCar +
-                 logHostSpeciesRange_c +
-                 logHostMass_c),
-  iter =4000, warmup = 2000, chains = 4, cores = 4,
-  control = list(adapt_delta = .8, max_treedepth = 10))
-
+# ### PARASITE RICHNESS IS RESPONSE, FULL MODELS----
+# # ...carnivores----
+# full_totrich_carngroup_mod <- brm(
+#   data = fullDat_carngroup_c,
+#   family = poisson,
+#   formula = bf(parRich | trunc(lb = 1) ~
+#                  combIUCN*logNumHostCitations_c +
+#                  combIUCN*groupSizeCar +
+#                  logHostSpeciesRange_c +
+#                  logHostMass_c),
+#   iter =4000, warmup = 2000, chains = 4, cores = 4,
+#   control = list(adapt_delta = .8, max_treedepth = 10))
+# 
 # # quick checks
 # summary(full_totrich_carngroup_mod)
 # plot(full_totrich_carngroup_mod)
 # pp_check(full_totrich_carngroup_mod, nsamples = 500)
-
-# add information criteria
-full_totrich_carngroup_mod <- readRDS("./FINAL/full/full_totrich_carngroup_mod.RDS")
-full_totrich_carngroup_mod <- add_ic(full_totrich_carngroup_mod, ic = "loo", reloo = TRUE)
-full_totrich_carngroup_mod <- add_ic(full_totrich_carngroup_mod, ic = "kfold")
-saveRDS(full_totrich_carngroup_mod, "./FINAL/full/full_totrich_carngroup_mod.RDS")
+# 
+# # add information criteria
+# full_totrich_carngroup_mod <- readRDS("./FINAL/full/full_totrich_carngroup_mod.RDS")
+# full_totrich_carngroup_mod <- add_ic(full_totrich_carngroup_mod, ic = "loo", reloo = TRUE)
+# full_totrich_carngroup_mod <- add_ic(full_totrich_carngroup_mod, ic = "kfold")
+# saveRDS(full_totrich_carngroup_mod, "./FINAL/full/full_totrich_carngroup_mod.RDS")
 
 # model fits, predictions and residuals
 full_totrich_carngroup_mod <- readRDS("./FINAL/full/full_totrich_carngroup_mod.RDS")
@@ -124,7 +124,7 @@ full_totrich_carngroup_marginal <- plot(marginal_effects(full_totrich_carngroup_
 saveRDS(full_totrich_carngroup_marginal, "./FINAL/full/full_totrich_carngroup_marginal.RDS")
 
 # specifically for plotting groupsize-by-threat effects
-full_totrich_carngroup_marginal_groupsize <- marginal_effects(full_totrich_carngroup_mod, effects = "groupSizeCar_c:combIUCN", method = "fitted")
+full_totrich_carngroup_marginal_groupsize <- marginal_effects(full_totrich_carngroup_mod, effects = "groupSizeCar:combIUCN", method = "fitted")
 saveRDS(full_totrich_carngroup_marginal_groupsize, "./FINAL/full/full_totrich_carngroup_marginal_groupsize.RDS")
 
 # ...primates
