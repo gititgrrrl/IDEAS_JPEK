@@ -46,6 +46,6 @@ primRICH_violin +
 combRICH_violin <- ggplot(combRICH, aes(x=Host_Order, y=parRich, fill=Threat_status)) +
   geom_violin(trim = F, position=position_dodge(1)) +
   geom_boxplot(width=0.05, position=position_dodge(1)) + 
-  stat_summary(fun.y=mean, geom="point", shape=23, size=2, fill = 'grey20')
+  stat_summary(fun.y=mean, geom="point", shape=23, size=2, position = position_dodge(1), aes(group = Threat_status), fill = "white") # <<<< THIS IS THE ONLY LINE I CHANGED (I ALSO CHANGED THE FILL COLOR JUST SO IT'S EASIER TO SEE, BUT YOU CAN CHANGE IT BACK IF YOU WANT)
 combRICH_violin + 
   scale_fill_brewer(palette="Dark2")

@@ -25,23 +25,23 @@ library(tidybayes)
 library(purrr)
 library(glmmTMB)
 
-# allDat <- read_csv("Data/JPEK/script4.csv") 
+allDat <- read_csv("Data/JPEK/script4.csv")
 
 ### FORMAT THE DATA----
 # # ...carnivores----
-# fullDat_carngroup <- allDat %>%
-#   filter(hostGroup == "carnivores") %>%
-#   select(hostName, groupSizeCar, parRich, logNumHostCitations, combIUCN, logHostSpeciesRange, logHostMass) %>%
-#   distinct() # 141 records
-# fullDat_carngroup <- fullDat_carngroup[complete.cases(fullDat_carngroup),] 
-# dim(fullDat_carngroup) # 77 records, mostly b/c missing group size data
-# 
-# fullDat_carngroup$groupSizeCar <- factor(fullDat_carngroup$groupSizeCar, levels = c("non_group", "group"))
-# fullDat_carngroup$combIUCN <- factor(fullDat_carngroup$combIUCN, levels = c("not_threatened", "threatened"))
-# fullDat_carngroup_c <- fullDat_carngroup %>%
-#   mutate(logNumHostCitations_c = logNumHostCitations - mean(logNumHostCitations, na.rm = TRUE),
-#          logHostSpeciesRange_c = logHostSpeciesRange - mean(logHostSpeciesRange, na.rm = TRUE),
-#          logHostMass_c = logHostMass - mean(logHostMass, na.rm = TRUE))
+fullDat_carngroup <- allDat %>%
+  filter(hostGroup == "carnivores") %>%
+  select(hostName, groupSizeCar, parRich, logNumHostCitations, combIUCN, logHostSpeciesRange, logHostMass) %>%
+  distinct() # 141 records
+fullDat_carngroup <- fullDat_carngroup[complete.cases(fullDat_carngroup),]
+dim(fullDat_carngroup) # 77 records, mostly b/c missing group size data
+
+fullDat_carngroup$groupSizeCar <- factor(fullDat_carngroup$groupSizeCar, levels = c("non_group", "group"))
+fullDat_carngroup$combIUCN <- factor(fullDat_carngroup$combIUCN, levels = c("not_threatened", "threatened"))
+fullDat_carngroup_c <- fullDat_carngroup %>%
+  mutate(logNumHostCitations_c = logNumHostCitations - mean(logNumHostCitations, na.rm = TRUE),
+         logHostSpeciesRange_c = logHostSpeciesRange - mean(logHostSpeciesRange, na.rm = TRUE),
+         logHostMass_c = logHostMass - mean(logHostMass, na.rm = TRUE))
 # write_csv(fullDat_carngroup_c, "./Data/JPEK/allDat_totrich_carngroup.csv")
         
 # # # Quick check correlation:
@@ -100,6 +100,19 @@ library(glmmTMB)
 #   iter =4000, warmup = 2000, chains = 4, cores = 4,
 #   control = list(adapt_delta = .8, max_treedepth = 10))
 # 
+# # side check with glmmtmb
+
+full_totrich_carngroup_TMBmod <- 
+  glmmTMB(
+    parRich ~
+      combIUCN*logNumHostCitations_c +
+      combIUCN*groupSizeCar +
+      logHostSpeciesRange_c +
+      logHostMass_c, 
+    data = fullDat_carngroup_c,
+    family=truncated_poisson)
+summary(full_totrich_carngroup_TMBmod)
+
 # # quick checks
 # summary(full_totrich_carngroup_mod)
 # plot(full_totrich_carngroup_mod)

@@ -1,0 +1,13 @@
+HostGroup,Indep.Var.,Estimate,Q2.5,Q97.5
+Carnivores,Intercept,2.44,2.36,2.52
+Carnivores,combIUCNthreatened,-0.46,-0.77,-0.17
+Carnivores,logNumHostCitations_c,0.79,0.75,0.83
+Carnivores,combIUCNthreatened:logNumHostCitations_c,0.22,0.01,0.45
+Primates,Intercept,1.18,0.96,1.39
+Primates,combIUCNthreatened,-0.05,-0.37,0.28
+Primates,logNumHostCitations_c,0.96,0.79,1.13
+Primates,combIUCNthreatened:logNumHostCitations_c,0.07,-0.15,0.28
+Ungulates,Intercept,2.84,2.76,2.91
+Ungulates,combIUCNthreatened,-0.06,-0.25,0.12
+Ungulates,logNumHostCitations_c,0.68,0.64,0.72
+Ungulates,combIUCNthreatened:logNumHostCitations_c,0.01,-0.16,0.18
