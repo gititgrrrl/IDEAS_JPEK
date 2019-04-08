@@ -7,7 +7,7 @@
 rm(list=ls())
 
 ### LOAD PACKAGES ----
-packages <- c("magrittr", "cowplot", "GGally", "scales", "tidyverse", "plyr", "brms")
+packages <- c("magrittr", "cowplot", "GGally", "scales", "tidyverse", "plyr", "brms", "ggmosaic", "cowplot")
 package.check <- lapply(packages, FUN = function(x) {
   if (!require(x, character.only = TRUE)) {
     install.packages(x, dependencies = TRUE, repos = "http://cran.us.r-project.org")
@@ -482,11 +482,11 @@ dev.off()
 # GENERATE COEFFICIENT PLOTS ----
 # NOTE: Only look at coefficients that both simple and full models estimate.
 # UPSHOT: For all three response variables, the full vs. simple (using same data) coefficients are pretty different, especially for primates. But the confidence intervals for full model coefficients are quite large, so often still overlap the simple model coefficients.
-FuncPlotCoef <- function(mod_list, terms_vec = NULL, exclude_terms = FALSE, plot_title) {
+FuncPlotCoef <- function(predict_list, terms_vec = NULL, exclude_terms = FALSE, plot_title) {
   # Coefficient plots, comparing across models
   #
   # Args:
-  #   mod_list:  List of (named) fitted regression models
+  #   predict_list:  List of (named) predictions from regression models
   #   terms_vec: The model terms to plot. To plot ALL terms, leave as NULL
   #   exclude_terms: TRUE if parameters in 'terms_vec' should be excluded from the plot, rather than included
   #   plot_title: Title for plot
@@ -586,126 +586,137 @@ write_csv(fullmod_coef_parastype_df, "./FINAL/summaries/fullmod_coef_parastype_d
 saveRDS(fullmod_coef, "./FINAL/summaries/fullmod_coef.RDS")
 
 ### RELATIONSHIP BETWEEN THREAT STATUS AND OTHER PREDICTORS ----
+pred_plots <- list()
 for(r in c("totrich", "parastrans", "parastype")) {
-  # for(g in c("carngroup", "primgroup", "unggroup")) {
-  g <- "carngroup"
+  p2 <- list()
+  for(g in c("carngroup", "primgroup", "unggroup")) {
     dat <- read_csv(paste0("./Data/JPEK/allDat_",r,"_",g,".csv"))
-    dat$groupSizeCar <- factor(dat$groupSizeCar, levels = c("non_group", "group"))
-    dat$combIUCN <- factor(dat$combIUCN, levels = c("not_threatened", "threatened"))
-    ggpairs(data = subset(dat, select= c(groupSizeCar, logHostSpeciesRange, logHostMass, combIUCN)), title = paste0(r, "_", g))
+    if(g == "carngroup") {
+      dat %<>% dplyr::rename(groupSize = groupSizeCar)
+      dat$groupSize <- factor(dat$groupSize, levels = c("non_group", "group"))
+    }
+      dat$combIUCN <- factor(dat$combIUCN, levels = c("not_threatened", "threatened"))
+      dat$combIUCN <- revalue(dat$combIUCN, c("not_threatened"="NT", "threatened"="T"))
+      p <- ggplot(dat, aes(x = combIUCN, fill = combIUCN)) + scale_fill_manual(values = c("seagreen4", "tomato2"))
+      
+      p1 <- plot_grid(
+        if(g=="carngroup") {p + geom_mosaic(aes(x = product(combIUCN, groupSize), fill = combIUCN)) + theme_bw(base_size = 10) + theme(axis.title.y = element_blank(), legend.position = "none")} else {p + geom_boxplot(aes(y = logGroupSizePriUng, fill = combIUCN)) + theme_bw(base_size = 9) + theme(legend.position = "none")},
+        p + geom_boxplot(aes(y = logHostMass, fill = combIUCN)) + theme_bw(base_size = 9) + theme(legend.position = "none"),
+        p + geom_boxplot(aes(y = logHostSpeciesRange)) + theme_bw(base_size = 9),
+        nrow = 1, rel_widths = c(1, 1, 1.6))
+      title <- ggdraw() + draw_label(paste0(r, ": ", g), fontface = "bold", size = 10)
+      p2[[g]] <- plot_grid(title, p1, ncol = 1, rel_heights = c(0.1, 1))
+      
+  }
+  pred_plots[[r]] <- plot_grid(plotlist = p2, ncol =1)
+  pdf(paste0("./FINAL/summaries/refplot_boxpatterns_", r, ".pdf"))
+  pred_plots[[r]]
+  dev.off()
+}
+saveRDS(pred_plots, "./FINAL/summaries/refplot_boxpatterns.RDS")
+
+### MODEL PREDICTIONS ----
+FuncPredVObs <- function(dat_df, predict_list, resp_colnam, obsID_colnam, color_colnam = NULL, coloraxt_title = NULL, facet_colnam) {
+  names(dat_df)[names(dat_df) == resp_colnam] <- "resp"
+  names(dat_df)[names(dat_df) == obsID_colnam] <- "group_var"
+  if(!is.null(color_colnam)) {
+    names(dat_df)[names(dat_df) == color_colnam] <- "color_var"
+  }
+  if(!is.null(facet_colnam)) {
+    names(dat_df)[names(dat_df) == facet_colnam] <- "facet_var"
+  }
+
+  CI_cov <- summary_list <- p1_list <- vector("list", length = length(predict_list))
+
+  for (i in 1:length(predict_list)) {
+    predict_out <- predict_list[[i]]
+
+    # Model predicted responses w/95% CI
+    predict_out %<>%
+      as_tibble() %>%
+      mutate(pred_Q2.5 = Q2.5,
+             pred_Q97.5 = Q97.5)
+
+    summary_list[[i]] <- cbind(dat_df, predict_out) %>%
+      mutate(pred_diff_obs = Estimate - resp,
+             CI_overlap = resp>=pred_Q2.5 & resp <=pred_Q97.5) # does the 95% CI overlap the observed value?
+    CI_cov[[i]] <- c(N_cov = sum(summary_list[[i]]$CI_overlap), prop_cov = round(((sum(summary_list[[i]]$CI_overlap)/nrow(summary_list[[i]]))*100), 1))
+
+  } # end of predict_list
+
+  axes_min = floor(min(sapply(summary_list, function(x) min(subset(x, select = c(pred_Q2.5, resp)), na.rm=TRUE))))
+  axes_max = ceiling(max(sapply(summary_list, function(x) max(subset(x, select = c(pred_Q97.5, resp)), na.rm=TRUE))))
+
+  for (i in 1:length(predict_list)) {
+    plot_dat <- summary_list[[i]]
+    # Plot 1
+    p1 <- ggplot(data = plot_dat, aes(x = resp, y = Estimate)) +
+      geom_abline(intercept = 0, slope = 1,
+                  linetype = "dashed", color = "gray") +
+      labs(x =  "Observed parasite richness", y = "Predicted parasite richness", subtitle = names(predict_list[i])) +
+      ylim(axes_min, axes_max) +
+      theme_bw(base_size = 10) +
+      theme(legend.position="right")
+
+    if(!is.null(color_colnam)) {
+      if(class(plot_dat$color_var) == "numeric") {
+        p1 <- p1 + 
+          scale_color_distiller(palette = "Spectral") +
+          scale_fill_distiller(palette = "Spectral") 
+      } else {
+        p1 <- p1 + 
+          scale_color_brewer(palette = "Spectral") +
+          scale_fill_brewer(palette = "Spectral")} 
+        
+      p1 <- p1 +
+        geom_errorbar(aes(ymin = pred_Q2.5, ymax = pred_Q97.5, color = color_var), width = 0) +
+        geom_point(aes(color = color_var), size = 2, alpha = 0.8) +
+        labs(color = coloraxt_title)
+    } else {
+      p1 <- p1 +
+        geom_errorbar(aes(ymin = pred_Q2.5, ymax = pred_Q97.5), width = 0) +
+        geom_point(size = 2, shape = 1)
+    }
+
+    if(!is.null(facet_colnam)) {
+      p1 <- p1 +
+        facet_wrap(.~facet_var)
+    }
+
+    p1_list[[i]] <- p1
+  }
+
+  # combine p1's
+  # title_p1 <- ggdraw() +
+  #   draw_label("Predicted vs. observed", fontface = "bold", size = 12)
+  # subtitle_p1 <- ggdraw() +
+  #   draw_label("Vertical lines are 95% confidence intervals of the model prediction.\nThe gray dashed line shows perfect prediction.", size = 10)
+# 
+#   final_p1 <- plot_grid(title_p1, subtitle_p1, plotlist= p1_list, ncol = 1, rel_heights = c(0.07, 0.13, rep(1, length(p1_list))))
+
+  final_p1 <- plot_grid(plotlist= p1_list, ncol = 1)
+  return_list <- list(CI_cov, summary_list, final_p1)
 }
 
+# ... full models predictions
+fullpredict_list <- FuncFilesIn(path_nam = "./FINAL/full/", pattern_nam ="_predict.RDS$")
 
+# ... simple models predictions
+simplepredict_list <- FuncFilesIn(path_nam = "./FINAL/simple/", pattern_nam ="_predict.RDS$")
 
-
-
-
-
-
-
-
-
-
-# ### MODEL PREDICTIONS (DID NOT DO THIS FOR CLASS PAPER) ----
-# FuncPredVObs <- function(dat_df, predict_list, resp_colnam, obsID_colnam, color_colnam, coloraxt_title, facet_colnam) {
-#   names(dat_df)[names(dat_df) == resp_colnam] <- "resp"
-#   names(dat_df)[names(dat_df) == obsID_colnam] <- "group_var"
-#   if(!is.null(color_colnam)) {
-#     names(dat_df)[names(dat_df) == color_colnam] <- "color_var"
-#   }
-#   if(!is.null(facet_colnam)) {
-#     names(dat_df)[names(dat_df) == facet_colnam] <- "facet_var"
-#   }
-#   
-#   summary_list <- p1_list <- vector("list", length = length(predict_list))
-#   
-#   for (i in 1:length(predict_list)) {
-#     predict_out <- predict_list[[i]]
-#     
-#     # Model predicted responses w/95% CI
-#     predict_out %<>%
-#       as_tibble() %>%
-#       mutate(pred_Q2.5 = Q2.5,
-#              pred_Q97.5 = Q97.5)
-#     
-#     summary_list[[i]] <- cbind(dat_df, predict_out) %>%
-#       mutate(pred_diff_obs = Estimate - resp,
-#              CI_overlap = resp>=pred_Q2.5 & resp <=pred_Q97.5) # does the 95% CI overlap the observed value?
-#     
-#   } # end of predict_list
-#   
-#   axes_min = floor(min(sapply(summary_list, function(x) min(subset(x, select = c(pred_Q2.5, resp)), na.rm=TRUE))))
-#   axes_max = ceiling(max(sapply(summary_list, function(x) max(subset(x, select = c(pred_Q97.5, resp)), na.rm=TRUE))))
-#   
-#   for (i in 1:length(predict_list)) {
-#     plot_dat <- summary_list[[i]]
-#     # Plot 1
-#     p1 <- ggplot(data = plot_dat, aes(x = resp, y = Estimate)) + 
-#       geom_abline(intercept = 0, slope = 1, 
-#                   linetype = "dashed", color = "gray") +
-#       labs(x =  "Observed parasite richness", y = "Predicted parasite richness", subtitle = names(predict_list[i])) +
-#       scale_color_brewer(palette = "Dark2") +
-#       scale_fill_brewer(palette = "Dark2") +
-#       theme_bw(base_size = 10) +
-#       theme(legend.position="top") 
-#     
-#     if(!is.null(color_colnam)) {
-#       p1 <- p1 +       
-#         geom_errorbar(aes(ymin = pred_Q2.5, ymax = pred_Q97.5, color = color_var), width = 0) +
-#         geom_point(aes(color = color_var), size = 2, alpha = 0.6) +
-#         labs(color = coloraxt_title)
-#     } else {
-#       p1 <- p1 +       
-#         geom_errorbar(aes(ymin = pred_Q2.5, ymax = pred_Q97.5), width = 0, color = "lightblue") +
-#         geom_point(size = 2, shape = 1)
-#     }
-#     
-#     if(!is.null(facet_colnam)) {
-#       p1 <- p1 +  
-#         facet_wrap(.~facet_var, scales = "free")
-#     }
-#     
-#     p1_list[[i]] <- p1
-#   }
-#   
-#   # combine p1's
-#   title_p1 <- ggdraw() +
-#     draw_label("Predicted vs. observed", fontface = "bold", size = 12)
-#   subtitle_p1 <- ggdraw() +
-#     draw_label("Vertical lines are 95% confidence intervals of the average prediction.\nThe gray dashed line shows perfect prediction.", size = 10)
-#   
-#   final_p1 <- plot_grid(title_p1, subtitle_p1, plotlist= p1_list, ncol = 1, rel_heights = c(0.07, 0.13, rep(1, length(p1_list))))
-#   
-#   return_list <- list(summary_list, final_p1)
-# }
-# 
-# # RESPONSE IS PARASITE RICHNESS ----
-# simple_brm_all_predict_fulldat <- readRDS("./FINAL/simple/simple_brm_all_predict_fulldat.RDS")
-# full_brm_all_predict <- readRDS("./FINAL/full/full_brm_all_predict.RDS")
-# 
-# temp_out <- FuncPredVObs(dat_df = fullDat, predict_list = list(`SIMPLE MODEL (using full model data) FOR PARASITE RICHNESS` = simple_brm_all_predict_fulldat, `FULL MODEL FOR PARASITE RICHNESS` = full_brm_all_predict), resp_colnam = "parRich", obsID_colnam = "hostName", color_colnam = "combIUCN", coloraxt_title = "Host IUCN status", facet_colnam = "hostGroup")
-# saveRDS(temp_out[[1]], "./Results/model-predictions/predict_observ_summary_simple_fulldat_totrich.RDS")
-# pdf(paste0("./Results/model-predictions/predict_observ_plot_simple_fulldat_totrich.pdf")) 
-# temp_out[[2]]
-# dev.off()
-# 
-# # RESPONSE IS PARASITE TRANSMISSION ----
-# simple_brm_parastrans_predict_fulldat <- readRDS("./FINAL/simple/simple_brm_parastrans_predict_fulldat.RDS")
-# full_brm_parastrans_predict <- readRDS("./FINAL/full/full_brm_parastrans_predict.RDS")
-# 
-# temp_out <- FuncPredVObs(dat_df = fullDat_parastrans, predict_list = list(`SIMPLE MODEL (using full model data) FOR PARASITE TRANSMISSION` = simple_brm_parastrans_predict_fulldat, `FULL MODEL FOR PARASITE TRANSMISSION` = full_brm_parastrans_predict), resp_colnam = "parRichCloseOnly", obsID_colnam = "hostName", color_colnam = "combIUCN", coloraxt_title = "Host IUCN status", facet_colnam = "hostGroup")
-# saveRDS(temp_out[[1]], "./Results/model-predictions/predict_observ_summary_simple_fulldat_parastrans.RDS")
-# pdf(paste0("./Results/model-predictions/predict_observ_plot_simple_fulldat_parastrans.pdf")) 
-# temp_out[[2]]
-# dev.off()
-# 
-# # RESPONSE IS PARASITE TYPE ----
-# simple_brm_parastype_predict_fulldat <- readRDS("./FINAL/simple/simple_brm_parastype_predict_fulldat.RDS")
-# full_brm_parastype_predict <- readRDS("./FINAL/full/full_brm_parastype_predict.RDS")
-# 
-# temp_out <- FuncPredVObs(dat_df = fullDat_parastype, predict_list = list(`SIMPLE MODEL (using full model data) FOR PARASITE TRANSMISSION` = simple_brm_parastype_predict_fulldat, `FULL MODEL FOR PARASITE TRANSMISSION` = full_brm_parastype_predict), resp_colnam = "parRich_micro", obsID_colnam = "hostName", color_colnam = "combIUCN", coloraxt_title = "Host IUCN status", facet_colnam = "hostGroup")
-# saveRDS(temp_out[[1]], "./Results/model-predictions/predict_observ_summary_simple_fulldat_parastype.RDS")
-# pdf(paste0("./Results/model-predictions/predict_observ_plot_simple_fulldat_parastype.pdf")) 
-# temp_out[[2]]
-# dev.off()
-
+for (r in c("totrich")) {
+  for (g in c("carngroup", "primgroup", "unggroup")) {
+    simple <- simplepredict_list[[paste0("simple_", r, "_", g, "_predict")]]
+    full <- fullpredict_list[[paste0("full_", r, "_", g, "_predict")]]
+    dat <- read_csv(paste0("./Data/JPEK/allDat_", r, "_", g, ".csv"))
+    resp_nam <- "parRich"
+    
+temp_out <- FuncPredVObs(dat_df = dat, predict_list = list(`SIMPLE MODEL` = simple, `FULL MODEL` = full), resp_colnam = resp_nam, obsID_colnam = "hostName", facet_colnam = "combIUCN")
+cat(r, "_", g)
+print(temp_out[[1]])
+saveRDS(temp_out[[2]], paste0("./FINAL/summaries/summary_predict_", r, "_", g, ".RDS"))
+saveRDS(temp_out[[3]], paste0("./FINAL/summaries/refplot_predict_", r, "_", g, ".RDS"))
+pdf(paste0("./FINAL/summaries/refplot_predict_", r, "_", g, ".pdf"))
+temp_out[[3]]
+dev.off()
+}}
