@@ -1,12 +1,18 @@
 #Micro vs. Macro raw data for each host clade
 
-carn1 <- data.frame(unggTYPE$parRich_micro, unggTYPE$parRich_macro, unggTYPE$combIUCN)
-carn2 <- melt(df1, id.vars='unggTYPE.combIUCN') 
+# read in parasite type data
+carnTYPE <- read.csv("./Data/JPEK/allDat_parastype_carngroup.csv") %>% mutate(Host_Order = "Carnivores", parRich_macro = parRich_alltypes - parRich_micro)
+unggTYPE <- read.csv("./Data/JPEK/allDat_parastype_unggroup.csv") %>% mutate(Host_Order = "Ungulates", parRich_macro = parRich_alltypes - parRich_micro)
+primTYPE <- read.csv("./Data/JPEK/allDat_parastype_primgroup.csv") %>% mutate(Host_Order = "Primates", parRich_macro = parRich_alltypes - parRich_micro)
+
+
+carn1 <- data.frame(carnTYPE$parRich_micro, carnTYPE$parRich_macro, carnTYPE$combIUCN)
+carn2 <- melt(carn1, id.vars='carnTYPE.combIUCN') 
 #df2 <- rename('Host Clade' = 'unggTYPE.Host_Order', unggTYPE.parRich_macro = Macroparasite Richness, unggTYPE.parRich_mcro = Microparasite Richness )
 head(carn2)
 
-carn_type <-  ggplot(carn2, aes(x=unggTYPE.combIUCN, y=value, fill=variable)) +
-  labs(x = 'Threat Status', y = 'Parasite Richness (uncorrected)', fill = 'Parasite Type') +
+carn_type <-  ggplot(carn2, aes(x=carnTYPE.combIUCN, y=value, fill=variable)) +
+  labs(title = "Carnivores", x = 'Threat Status', y = 'Parasite Richness (uncorrected)', fill = 'Parasite Type') +
   geom_bar(stat='identity', position='dodge')
 
 carn_type + 
@@ -20,7 +26,7 @@ prim2 <- melt(prim1, id.vars='primTYPE.combIUCN')
 head(prim2)
 
 prim_type <-  ggplot(prim2, aes(x=primTYPE.combIUCN, y=value, fill=variable)) +
-  labs(x = 'Threat Status', y = 'Parasite Richness (uncorrected)', fill = 'Parasite Type') +
+  labs(title = "Primates", x = 'Threat Status', y = 'Parasite Richness (uncorrected)', fill = 'Parasite Type') +
   geom_bar(stat='identity', position='dodge')
 
 prim_type + 
@@ -34,7 +40,7 @@ ungg2 <- melt(ungg1, id.vars='unggTYPE.combIUCN')
 head(ungg2)
 
 ungg_type <-  ggplot(ungg2, aes(x=unggTYPE.combIUCN, y=value, fill=variable)) +
-  labs(x = 'Threat Status', y = 'Parasite Richness (uncorrected)', fill = 'Parasite Type') +
+  labs(title = "Ungulates", x = 'Threat Status', y = 'Parasite Richness (uncorrected)', fill = 'Parasite Type') +
   geom_bar(stat='identity', position='dodge')
 
 ungg_type + 
