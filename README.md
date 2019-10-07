@@ -5,9 +5,6 @@ We wanna know.
 ## IDEAS_JPEK
 This repo is for beginning a collaborative research project for the [IDEAS](http://ideas.ecology.uga.edu) Capstone class (ECOL 8530), Spring 2019.
 
-## Background
-<img src="https://media.giphy.com/media/3o72FkiKGMGauydfyg/giphy.gif" width=50%>
-
 ## Data Sources
 
 * **GMPD**: *Global Mammal Parasite Database version 2.0* - [Stephens et al. 2017](https://esajournals.onlinelibrary.wiley.com/doi/full/10.1002/ecy.1799)
